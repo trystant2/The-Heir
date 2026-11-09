@@ -81427,6 +81427,27 @@ function applyHeirResultQuestionByPk(
 
     return true;
 }
+const RUNNING_MATE_EXTRA_VALUES = new Map([
+    [2500,-0.45,-0.45], [2501,-0.4,-0.3],   [2502,0.25,-0.05],
+    [2503,-0.55,-0.45], [2504,0.55,0.8],    [2505,0.25,0.45],
+    [2506,0.52,0.8],    [2507,0.25,0.51],   [2508,-0.24,-0.25],
+    [2509,0.18,0.095],  [2510,-0.2,0.45],   [2511,-0.75,-0.7],
+    [2512,0.45,0.45],   [2513,-0.4,-0.45],  [2514,-0.1,-0.1],
+    [2515,-0.2,-0.41],  [2516,-0.5,-0.6],   [2517,-0.25,-0.35],
+    [2518,0.35,0.2],    [2519,0.45,0.8],    [2520,0.52,0.8],
+    [2521,-0.25,0.15],  [2522,0.45,0.3],    [2523,-0.45,-0.4],
+    [2524,-0.4,-0.6],   [2525,-0.1,-0.4],   [2526,-0.2,-0.41],
+    [2527,0.25,0.15],   [2528,0.25,0.1],    [2529,0.25,0.4],
+    [2530,0.25,0.45],   [2531,0.55,0.41],   [2532,0.18,0.095],
+    [2533,-0.55,-0.75], [2534,-0.4,-0.25],  [2535,-0.45,-0.45],
+    [2536,0.35,0.45],   [2537,-0.18,0.15],  [2538,0.35,0.45],
+    [2539,-0.25,-0.45], [2540,-0.55,-0.75], [2541,-0.55,-0.45],
+    [2542,-0.25,-0.21], [2543,0.15,-0.3],   [2544,0.45,0.8],
+    [2545,0.25,0.5],    [2546,0.35,0.45],   [2547,0.9,0.95],
+    [2548,-0.5,-0.85],  [2549,-0.21,0.15],  [2550,-0.45,-0.81],
+    [21087,-0.125,-0.3],[21097,0.5,0.25],   [21107,-0.55,-0.75],
+    [21117,-0.2,0.55],  [21127,-0.2,-0.35]
+].map(([pk, democracy, trump]) => [pk, { democracy, trump }]));
 
 function NewHeir(name, type) {
     let heir = name;
@@ -82164,6 +82185,22 @@ applyHeirResultQuestionByPk(49206);
         setIssueScore(1002, -0.5);
         setIssueScore(1003, -0.35);
         setIssueScore(12816, -0.35);
+        if(type==1){
+                applyHeirFormulaMultipliers(({ pk, economy }) => {
+        const democracy = RUNNING_MATE_EXTRA_VALUES.get(pk)?.democracy;
+        let adjustment = 0;
+
+        if (democracy >= -0.7 && democracy <= 0.7) {
+            adjustment += (0.1667 * democracy);
+        }
+
+        if (economy >= -0.55 && economy <= 0.7) {
+            adjustment += (-0.096 * economy) + 0.0072;
+        }
+
+        return adjustment;
+    });
+        }
     }
     if(heir == "Hawley" || heir == "Josh Hawley"){
         let id = e.candidate_json.map(p => p.pk).indexOf(1001);
@@ -84128,17 +84165,45 @@ if([55059].includes(ans)){
 if([50787].includes(ans)){
     dealrfk +=1;
 }
-if(ans==53539){
-          updateFooterCharacters({
-        candidateImage: "https://i.imgur.com/lesUl9o.jpeg",
-        runningMateImage: "https://i.imgur.com/06qmJxQ.jpeg",
-        candidateRole: "Senator",
-        candidateName: "Tim Scott",
-        runningMateRole: "Governor",
-        runningMateName: "Brian Kemp"
-    });
-    NewHeir("Scott",0)
+if (ans == 53539) {
+    NewHeir("Scott", 1);
+
+    if (Number(trumpdead) === 0) {
+        const kemp = {
+            name: "Brian Kemp",
+            codeName: "Kemp",
+            party: "Republican",
+            state: "Georgia",
+            role: "Governor",
+            photo: "https://i.imgur.com/06qmJxQ.jpeg"
+        };
+
+        window.__theHeirSelectedRunningMate = kemp;
+        window.selectedRunningMate = kemp.name;
+        campaignTrail_temp.running_mate_last_name = "Kemp";
+        campaignTrail_temp.running_mate_image_url = kemp.photo;
+        campaignTrail_temp.selected_running_mate = {
+            pk: "heir-vp-brian-kemp",
+            fields: {
+                first_name: "Brian",
+                last_name: "Kemp",
+                party: kemp.party,
+                state: kemp.state,
+                image_url: kemp.photo,
+                description: kemp.role
+            }
+        };
+
+        updateFooterCharacters({
+            candidateImage: "https://i.imgur.com/lesUl9o.jpeg",
+            runningMateImage: kemp.photo,
+            candidateRole: "Senator",
+            candidateName: "Tim Scott",
+            runningMateRole: kemp.role,
+            runningMateName: kemp.name
+        });
     }
+}
 if(ans==52762){
           updateFooterCharacters({
         candidateImage: "https://i.imgur.com/uiwyqVf.jpeg",
@@ -84542,7 +84607,7 @@ const THE_HEIR_PRIMARY_PROFILES = {
         firstName: "Donald",
         lastName: "Trump Jr.",
         color: "#7a3232",
-        image: "https://i.imgur.com/dF5Je9n.jpeg",
+        image: "https://i.imgur.com/SijvUe2.jpeg",
         role: "Businessman",
         name: "Donald Trump Jr."
     },
@@ -87232,6 +87297,11 @@ if (profile.key === "khanna") {
 }
     });
 
+    if (profile.key === "aoc") {
+        changed += addStateMultiplierDelta(2700, 0.25);
+        changed += addStateMultiplierDelta(2598, -0.25);
+    }
+
     return changed;
 }
 
@@ -89468,13 +89538,11 @@ function syncVpTable(
             )
             .trim();
 
-        setResultCellText(
-            vpCell,
-            findVp(
-                map,
-                candidateName
-            )
-        );
+                const runningMate = normalize(candidateName) === "tim scott"
+            ? (numberValue(() => trumpdead, "trumpdead") === 1 ? "Eric Trump" : "Brian Kemp")
+            : findVp(map, candidateName);
+
+        setResultCellText(vpCell, runningMate);
     });
 }
 
@@ -93434,57 +93502,34 @@ function cacheOriginalImages() {
     const candidatePic = document.getElementById("candidate_pic");
     const runningMatePic = document.getElementById("running_mate_pic");
 
-    if (candidatePic?.src) {
-        footerState.candidateSrc = candidatePic.src;
-        candidatePic.style.display = "none";
-    }
-
-    if (runningMatePic?.src) {
-        footerState.runningMateSrc = runningMatePic.src;
-        runningMatePic.style.display = "none";
-    }
+    if (candidatePic?.getAttribute("src")) footerState.candidateSrc = candidatePic.src;
+    if (runningMatePic?.getAttribute("src")) footerState.runningMateSrc = runningMatePic.src;
 }
 
-function isVisible(el) {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    return style.display !== "none" &&
-           style.visibility !== "hidden" &&
-           el.offsetParent !== null;
-}
+function getHeirQuestionScreen() {
+    const gameWindow = document.getElementById("game_window");
+    if (!gameWindow) return null;
 
-function isQuestionScreenActive() {
-    const questionForm = document.getElementById("question_form");
-    const innerQuestion = document.querySelector(".inner_window_question");
+    for (const innerQuestion of gameWindow.querySelectorAll(".inner_window_question")) {
+        const holder = innerQuestion.querySelector("#question_form");
+        const form = holder?.matches("form")
+            ? holder
+            : (holder?.querySelector("form") ||
+                innerQuestion.querySelector('form[name="question"]') || holder);
 
-    return isVisible(questionForm) || isVisible(innerQuestion);
+        if (form && form.getClientRects().length &&
+            getComputedStyle(form).visibility !== "hidden" &&
+            form.querySelector('input[type="radio"]')) {
+            return { gameWindow, innerQuestion, form };
+        }
+    }
+
+    return null;
 }
 
 function removeFooter() {
-    const footer =
-        document.getElementById("new_footer");
-
-    if (footer) {
-        footer.remove();
-    }
-
-    const buttonRow =
-        document.getElementById(
-            "heir_question_button_row"
-        );
-
-    if (buttonRow) {
-        buttonRow.remove();
-    }
-
-    const signDisplay =
-        document.querySelector(
-            ".inner_window_sign_display"
-        );
-
-    if (signDisplay) {
-        signDisplay.style.display = "";
-    }
+    document.getElementById("new_footer")?.remove();
+    document.getElementById("heir_question_button_row")?.remove();
 }
 
 function getQuestionImageUrl() {
@@ -93606,47 +93651,40 @@ function createQuestionCard(questionText, imageSrc) {
 
 function renderFooter() {
     const gameWindow = document.getElementById("game_window");
-    if (!gameWindow || !window.campaignTrail_temp) return;
+    const temp = window.campaignTrail_temp;
+    if (!gameWindow || !temp) return;
 
     cacheOriginalImages();
 
-    const candidateImage =
-        FOOTER_CONFIG.candidateImage || footerState.candidateSrc;
+    const showPenceAsPresident =
+        Number(temp.question_number) === 20 &&
+        Number(typeof impeach !== "undefined" ? impeach : window.impeach) === 1;
+
+    const candidateImage = showPenceAsPresident
+        ? "https://i.imgur.com/2Lerjf4.jpeg"
+        : (FOOTER_CONFIG.candidateImage || footerState.candidateSrc || temp.candidate_image_url);
 
     const runningMateImage =
-        FOOTER_CONFIG.runningMateImage || footerState.runningMateSrc;
+        FOOTER_CONFIG.runningMateImage || footerState.runningMateSrc || temp.running_mate_image_url;
 
     if (!candidateImage || !runningMateImage) return;
 
-    let footer = document.getElementById("new_footer");
+    let footer = gameWindow.querySelector(":scope > #new_footer");
     if (!footer) {
         footer = document.createElement("div");
         footer.id = "new_footer";
         gameWindow.appendChild(footer);
     }
 
-    const eObj = getE();
-    footer.classList.toggle("altcolors", !!eObj.altcolors);
-
-    const questionText = getQuestionText();
-    const questionImageUrl = getQuestionImageUrl();
-
-    footer.innerHTML = "";
-
-    footer.appendChild(
+    footer.classList.toggle("altcolors", Boolean(getE()?.altcolors));
+    footer.replaceChildren(
         createSideCard(
             candidateImage,
-            FOOTER_CONFIG.mainCandidateRole,
-            FOOTER_CONFIG.mainCandidateName,
+            showPenceAsPresident ? "President" : FOOTER_CONFIG.mainCandidateRole,
+            showPenceAsPresident ? "Mike Pence" : FOOTER_CONFIG.mainCandidateName,
             "candidate"
-        )
-    );
-
-    footer.appendChild(
-        createQuestionCard(questionText, questionImageUrl)
-    );
-
-    footer.appendChild(
+        ),
+        createQuestionCard(getQuestionText(), getQuestionImageUrl()),
         createSideCard(
             runningMateImage,
             FOOTER_CONFIG.fallbackRunningMateRole,
@@ -93655,202 +93693,91 @@ function renderFooter() {
         )
     );
 
-    const signDisplay = document.querySelector(".inner_window_sign_display");
-    if (signDisplay) {
-        signDisplay.style.display = "none";
-    }
-
-    footerState.lastQuestionNumber = window.campaignTrail_temp.question_number;
+    footerState.lastQuestionNumber = Number(temp.question_number);
 }
 
-function normalizeQuestionLayout() {
-    const gameWindow = document.getElementById("game_window");
+function normalizeQuestionLayout({ innerQuestion, form }) {
+    const actionSelector = 'button, input[type="button"], input[type="submit"]';
+    const embeddedButtonRow = form.querySelector(":scope > .question-button-row");
+    const buttons = Array.from(innerQuestion.querySelectorAll(actionSelector));
+    const actionIds = ["answer_select_button", "view_electoral_map", "headquarter_button"];
+    const actionLabels = [
+        ["continue", "continuar", "siguiente"],
+        ["latest polls/electoral map"],
+        ["campaign hq"]
+    ];
+    const actionButtons = actionIds.map((id, index) =>
+        buttons.find(button => button.id === id) ||
+        buttons.find(button => actionLabels[index].includes(
+            (button.value || button.textContent || "").trim().toLowerCase()
+        ))
+    ).filter(Boolean);
 
-    const innerQuestion =
-        gameWindow?.querySelector(".inner_window_question");
+    if (!form.classList.contains("heir-question-form")) {
+        form.classList.add("heir-question-form");
+    }
 
-    const questionForm =
-        document.getElementById("question_form");
-
-    const form = document.querySelector('#question_form form[name="question"]');
-
-    if (!gameWindow || !innerQuestion || !questionForm || !form) return;
-    const actionSelector = [
-        "button",
-        'input[type="button"]',
-        'input[type="submit"]'
-    ].join(",");
-
-    const embeddedButtonRow =
-        form.querySelector(
-            ":scope > .question-button-row"
-        );
-
-    let answerGrid =
-        form.querySelector(
-            ":scope > .question-answer-grid"
-        );
-
+    let answerGrid = form.querySelector(":scope > .question-answer-grid");
     if (!answerGrid) {
-        answerGrid =
-            document.createElement("div");
-
-        answerGrid.className =
-            "question-answer-grid";
-
-        Array.from(form.childNodes).forEach(
-            node => {
-                if (node === embeddedButtonRow) {
-                    return;
-                }
-
-                const isDirectAction =
-                    node.nodeType ===
-                        Node.ELEMENT_NODE &&
-                    node.matches(
-                        actionSelector
-                    );
-
-                if (!isDirectAction) {
-                    answerGrid.appendChild(node);
-                }
-            }
-        );
-
+        answerGrid = document.createElement("div");
+        answerGrid.className = "question-answer-grid";
         form.prepend(answerGrid);
     }
 
-function getActionButtonText(button) {
-    return String(
-        button.value || button.textContent || ""
-    )
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
-}
-
-function getActionButtonOrder(button) {
-    const text = getActionButtonText(button);
-
-    if (
-        text === "continue" ||
-        text === "continuar" ||
-        text === "siguiente"
-    ) {
-        return 0;
-    }
-
-    if (
-        button.id === "view_electoral_map" ||
-        text === "latest polls/electoral map"
-    ) {
-        return 1;
-    }
-
-    if (
-        button.id === "headquarter_button" ||
-        text === "campaign hq"
-    ) {
-        return 2;
-    }
-
-    return 3;
-}
-
-const actionButtons = Array.from(
-    gameWindow.querySelectorAll(actionSelector)
-)
-    .filter(button => {
-        if (
-            button.closest(
-                "#heir_question_button_row, #new_footer"
-            )
-        ) {
-            return false;
+    for (const node of Array.from(form.children)) {
+        if (node === answerGrid || node === embeddedButtonRow || node.matches(actionSelector)) continue;
+        if (node.matches('input[type="radio"], label, br') ||
+            node.querySelector('input[type="radio"]')) {
+            answerGrid.appendChild(node);
         }
+    }
 
-        const text = getActionButtonText(button);
+    if (!actionButtons.length) return;
 
-        return (
-            button.id === "view_electoral_map" ||
-            button.id === "headquarter_button" ||
-            text === "continue" ||
-            text === "continuar" ||
-            text === "siguiente" ||
-            text === "latest polls/electoral map" ||
-            text === "campaign hq"
-        );
-    })
-    .sort(
-        (first, second) =>
-            getActionButtonOrder(first) -
-            getActionButtonOrder(second)
-    );
-    let buttonRow =
-        document.getElementById(
-            "heir_question_button_row"
-        );
-
+    let buttonRow = innerQuestion.querySelector(":scope > #heir_question_button_row");
     if (!buttonRow) {
-        buttonRow =
-            document.createElement("div");
-
-        buttonRow.id =
-            "heir_question_button_row";
-
-        buttonRow.className =
-            "question-button-row";
+        buttonRow = document.createElement("div");
+        buttonRow.id = "heir_question_button_row";
+        buttonRow.className = "question-button-row";
+        innerQuestion.appendChild(buttonRow);
     }
 
-if (buttonRow.parentElement !== innerQuestion) {
-    innerQuestion.appendChild(buttonRow);
-}
-
-if (actionButtons.length) {
-    const existingCampaignHqButton =
-        document.getElementById("headquarter_button");
-
-    buttonRow.replaceChildren(...actionButtons);
-
-    if (
-        existingCampaignHqButton &&
-        !buttonRow.contains(existingCampaignHqButton)
-    ) {
-        buttonRow.appendChild(existingCampaignHqButton);
+    if (buttonRow.children.length !== actionButtons.length ||
+        actionButtons.some((button, index) => buttonRow.children[index] !== button)) {
+        buttonRow.replaceChildren(...actionButtons);
     }
-}
 
-Array.from(
-    buttonRow.querySelectorAll(actionSelector)
-).forEach(button => {
-    /*
-     * Conserva los eventos originales de cada botón, pero evita
-     * que se conviertan en envíos HTML que recarguen la página.
-     */
-    button.removeAttribute("form");
-});
+    for (const button of actionButtons) {
+        if (button.hasAttribute("form")) button.removeAttribute("form");
+    }
 
-    if (
-        embeddedButtonRow?.isConnected
-    ) {
+    if (embeddedButtonRow && !embeddedButtonRow.querySelector(actionSelector)) {
         embeddedButtonRow.remove();
     }
 }
 
 function ensureFooterUpdated() {
-    normalizeQuestionLayout();
-    if (!isQuestionScreenActive()) {
+    const screen = getHeirQuestionScreen();
+    if (!screen) {
+        const gameWindow = document.getElementById("game_window");
+        if (gameWindow?.classList.contains("heir-question-active")) {
+            gameWindow.classList.remove("heir-question-active");
+        }
         removeFooter();
         return;
     }
 
-    const currentQuestion = window.campaignTrail_temp?.question_number;
-    if (currentQuestion === undefined) return;
+    const { gameWindow } = screen;
+    if (!gameWindow.classList.contains("heir-question-active")) {
+        gameWindow.classList.add("heir-question-active");
+    }
+    normalizeQuestionLayout(screen);
 
-    if (
-        !document.getElementById("new_footer") ||
-        footerState.lastQuestionNumber !== currentQuestion
-    ) {
+    const currentQuestion = Number(window.campaignTrail_temp?.question_number);
+    if (!Number.isFinite(currentQuestion)) return;
+
+    if (!gameWindow.querySelector(":scope > #new_footer") ||
+        footerState.lastQuestionNumber !== currentQuestion) {
         renderFooter();
     } else {
         cacheOriginalImages();
@@ -93864,8 +93791,11 @@ function footerMutationHandler() {
     footerObserverRunning = true;
 
     requestAnimationFrame(() => {
-        ensureFooterUpdated();
-        footerObserverRunning = false;
+        try {
+            ensureFooterUpdated();
+        } finally {
+            footerObserverRunning = false;
+        }
     });
 }
 
@@ -94011,6 +93941,60 @@ input[type="radio"]:checked + label {
     order: 9999 !important;
     margin-top: 0 !important;
     transform: none !important;
+}
+#game_window.heir-question-active:has(> #new_footer)
+:is(#candidate_pic, #running_mate_pic, .inner_window_sign_display) {
+    display: none !important;
+}
+
+#game_window.heir-question-active > #new_footer {
+    flex: 0 0 auto !important;
+}
+
+#game_window .heir-question-form {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    position: static !important;
+}
+
+#game_window .heir-question-form > .question-answer-grid {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    align-content: start !important;
+    overflow-y: auto;
+    width: min(100%, 930px);
+    margin: 0 auto;
+}
+
+#game_window .question-answer-grid > :is(div, p, li, span):has(input[type="radio"]) {
+    grid-column: 1 / -1;
+    display: grid !important;
+    grid-template-columns: subgrid;
+}
+
+#game_window .question-answer-grid br {
+    display: none !important;
+}
+
+#game_window .question-answer-grid input[type="radio"] {
+    grid-column: 1 !important;
+    justify-self: start;
+    align-self: center;
+    margin: 0 10px 0 0 !important;
+}
+
+#game_window .question-answer-grid input[type="radio"] + label {
+    grid-column: 2 !important;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+#game_window .question-answer-grid label:has(> input[type="radio"]) {
+    grid-column: 1 / -1 !important;
+    display: flex !important;
+    align-items: center;
 }
 `;
 
@@ -94834,16 +94818,16 @@ function getAvailableRunningMates() {
         style.textContent = `
 #${POPUP_ID} {
   position: absolute;
-  inset: 0;
+  inset: 3rem 0 0;
   z-index: 10020;
-  min-height: 600px;
-  height: 600px;
+  min-height: 0;
+  height: auto;
   overflow: visible;
   box-sizing: border-box;
   background-size: 100% 100%;
   background-position: center center;
   background-repeat: no-repeat;
-  box-shadow: inset 0 0 0 1px #000, inset 0 0 0 2px #fff;
+  box-shadow: none;
 }
 
 #${POPUP_ID} * {
@@ -94853,7 +94837,7 @@ function getAvailableRunningMates() {
 #${POPUP_ID} .the-heir-carousel-stage {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 100%;
   margin: 0;
   padding: 0;
   background: transparent;
@@ -94904,7 +94888,7 @@ function getAvailableRunningMates() {
 }
 #${POPUP_ID} .the-heir-carousel-title {
   position: absolute;
-  top: 104px;
+  top: calc(104px - 3rem);
   left: 50%;
   z-index: 40;
   transform: translateX(-50%);
@@ -94928,7 +94912,7 @@ function getAvailableRunningMates() {
   box-shadow: none;
   width: 100%;
   height: 100%;
-  padding: 148px 76px 112px 94px;
+  padding: calc(148px - 3rem) 76px 112px 94px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95424,7 +95408,6 @@ function applyHeirCandidateBanner(item) {
         const popup = getPopup();
         const item = currentItem();
         if (!popup) return;
-      applyHeirCandidateBanner(item);
       applyHeirCandidateMusic(item);
 
         popup.style.setProperty("--heir-carousel-glow", item?.color || "rgba(255,255,255,0.55)");
@@ -98493,10 +98476,12 @@ function getNewsomVpPreviewScores() {
         {
             name: "Condi",
             score:
-                (-currentEcopol) -
-                currentForpol +
-                currentPop / 2 +
-                getPreviewVpBonus("condi"),
+                -Math.min(currentEcopol, 0)
+                - Math.min(currentForpol, 0)
+                - 2 * Math.max(currentForpol, 0)
+                - 2 * Math.max(currentEcopol, 0)
+                + (currentPop >= 0 ? Math.expm1(0.4 * currentPop) : 2 * currentPop)
+                + getPreviewVpBonus("condi"),
             image: NEWSOM_VP_PREVIEW_IMAGES.Rice
         },
         {
@@ -98504,6 +98489,8 @@ function getNewsomVpPreviewScores() {
             score:
                 currentForpol +
                 currentUnrest +
+                0.5 * Math.max(currentPop, 0) +
+                Math.min(currentPop, 0) +
                 getPreviewVpBonus("tlaib"),
             image: NEWSOM_VP_PREVIEW_IMAGES.Tlaib
         },
@@ -98530,9 +98517,7 @@ function formatNewsomVpPreviewScore(score) {
 function getNewsomVpPreviewSignature(options) {
     return options
         .map(option =>
-            `${option.name}:${formatNewsomVpPreviewScore(
-                option.score
-            )}`
+            `${option.name}:${option.score < -5}:${formatNewsomVpPreviewScore(option.score)}`
         )
         .join("|");
 }
@@ -98596,33 +98581,26 @@ function createNewsomVpPreview(options) {
             `url("${option.image}")`
         );
 
-        /*
-         * El nombre sigue disponible para lectores de
-         * pantalla, pero no aparece visualmente.
-         */
-        tile.setAttribute(
-            "aria-label",
-            `${option.name}: ` +
-            formatNewsomVpPreviewScore(
-                option.score
-            )
-        );
+        const lowScore = option.score < -5;
+        const displayScore = formatNewsomVpPreviewScore(option.score);
+        tile.setAttribute("aria-label", lowScore
+            ? option.name
+            : `${option.name}: ${displayScore}`);
 
-        const text = document.createElement("div");
-        text.className =
-            "campaign-hq-newsom-choice-text";
+        if (lowScore) {
+            tile.style.filter = "grayscale(1)";
+        } else {
+            const text = document.createElement("div");
+            text.className = "campaign-hq-newsom-choice-text";
 
-        const score = document.createElement("span");
-        score.className =
-            "campaign-hq-newsom-choice-score";
+            const score = document.createElement("span");
+            score.className = "campaign-hq-newsom-choice-score";
+            score.textContent = displayScore;
 
-        score.textContent =
-            formatNewsomVpPreviewScore(
-                option.score
-            );
+            text.appendChild(score);
+            tile.appendChild(text);
+        }
 
-        text.appendChild(score);
-        tile.appendChild(text);
         grid.appendChild(tile);
     });
 
@@ -110170,13 +110148,14 @@ const options = [
     }
 ].filter(option => option.name !== 'Rice' || !['Bush', 'Cox'].includes(gop));      newsomVp = options.every(option=>option.score<0) ? 'Warren' : options.reduce((best,option)=>option.score>best.score?option:best).name;
     }
-    return {out,totv,gop,primary,gopName:FULL_NAMES[gop] || candidateName(row(1001)),gopVp:rawVp,newsomVp,demName,demRfk,punishedRfk,punishedCox,campaignBreak:campaignBreakValue,trumpDead,answers,impeachment,popularWinner,gopEV,demEV,spoilerEV,winner,winnerName,winnerEV:sorted[0]?.[1] || 0,hasResults:resultMap.size>0,deadlock:resultMap.size>0 && winner===null,spoilerTrumpJr:!!canonical(spoilerName)&&canonical(spoilerName)==='Trump Jr.',spoilerBannon:/bannon/i.test(spoilerName),iran:number(safe(()=>iran,window.iran)),taiwan:number(safe(()=>taiwan,window.taiwan))};
+    return {out,totv,gop,primary,gopName:FULL_NAMES[gop] || candidateName(row(1001)),gopVp:gop === 'Scott' && trumpDead === 0 ? 'Brian Kemp' : rawVp,newsomVp,demName,demRfk,punishedRfk,punishedCox,campaignBreak:campaignBreakValue,trumpDead,answers,impeachment,popularWinner,gopEV,demEV,spoilerEV,winner,winnerName,winnerEV:sorted[0]?.[1] || 0,hasResults:resultMap.size>0,deadlock:resultMap.size>0 && winner===null,spoilerTrumpJr:!!canonical(spoilerName)&&canonical(spoilerName)==='Trump Jr.',spoilerBannon:/bannon/i.test(spoilerName),iran:number(safe(()=>iran,window.iran)),taiwan:number(safe(()=>taiwan,window.taiwan))};
   }
-  function selectId(c) {
+  function selectId(c, resolved) {
     if (c.deadlock) {
       if (c.demRfk) return 25;
-      if (c.spoilerTrumpJr) return 23;
-      if (c.spoilerBannon && !c.punishedCox) return 24;
+      const loreId = (resolved || resolveDeadlockForLore(c)).deadlockLoreId;
+      if (loreId === 45) return 23;
+      if (loreId === 51) return 24;
       return 22;
     }
     if (c.winner === 1001) {
@@ -110220,6 +110199,9 @@ const options = [
       return item.format === 'html' && key !== 'bushVpText' ? escapeHTML(values[key]) : values[key];
     });
     const html = item.format === 'html' ? body : `<div class="heir-ending-plain">${escapeHTML(body)}</div>`;
+        if (id === 26 && c.gopVp === 'Brian Kemp') {
+      return {...item, body, html: '<p><strong>Vice President:</strong> Brian Kemp</p>' + html};
+    }
     return {...item,body,html};
   }
   const LORE = {"entries":[
@@ -110256,7 +110238,7 @@ const options = [
     {"id":31,"label":"Walsh pardons Shiloh Hendrix, Chud The Builder and Gypsy Crusader, a staled administration. (Walsh/Gosar)","image":"https://i.imgur.com/GptYHQc.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Matt Walsh's Cruelty Is No Longer Shocking. His Failure Is.</title>\n\n\n<style>\n@font-face {\n    font-family: \"Heir Guardian Headline\";\n    src: url(\"https://assets.guim.co.uk/static/frontend/fonts/guardian-headline/noalts-not-hinted/GHGuardianHeadline-Medium.woff2\") format(\"woff2\");\n    font-weight: 500;\n    font-display: swap;\n}\n\n\n@font-face {\n    font-family: \"Heir Guardian Headline\";\n    src: url(\"https://assets.guim.co.uk/static/frontend/fonts/guardian-headline/noalts-not-hinted/GHGuardianHeadline-Bold.woff2\") format(\"woff2\");\n    font-weight: 700;\n    font-display: swap;\n}\n\n\n@font-face {\n    font-family: \"Heir Guardian Text\";\n    src: url(\"https://assets.guim.co.uk/static/frontend/fonts/guardian-textegyptian/noalts-not-hinted/GuardianTextEgyptian-Regular.woff2\") format(\"woff2\");\n    font-weight: 400;\n    font-display: swap;\n}\n\n\n#heir-guardian,\n#heir-guardian * {\n    box-sizing: border-box;\n}\n\n\n#heir-guardian {\n    --hg-blue: #052962;\n    --hg-orange: #c74600;\n    --hg-border: #dcdcdc;\n    width: 100%;\n    margin: 0;\n    background: #ffffff;\n    color: #121212;\n    text-align: left;\n    font-family: Arial, Helvetica, sans-serif;\n    font-size: 16px;\n    line-height: 1.5;\n    letter-spacing: 0;\n    overflow-wrap: break-word;\n}\n\n\n#heir-guardian a {\n    color: inherit;\n}\n\n\n#heir-guardian .hg-masthead {\n    background: var(--hg-blue);\n    color: #ffffff;\n}\n\n\n#heir-guardian .hg-header-inner {\n    max-width: 1240px;\n    margin: 0 auto;\n    padding: 18px 24px 22px;\n    display: flex;\n    align-items: flex-end;\n    justify-content: space-between;\n    gap: 24px;\n}\n\n\n#heir-guardian .hg-support {\n    margin: 0;\n    color: #ffe500;\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 28px;\n    font-weight: 700;\n    line-height: 1.05;\n}\n\n\n#heir-guardian .hg-support span {\n    display: block;\n    margin-top: 8px;\n    color: #ffffff;\n    font-family: Arial, Helvetica, sans-serif;\n    font-size: 15px;\n    font-weight: 400;\n    line-height: 1.4;\n}\n\n\n#heir-guardian .hg-logo {\n    display: block;\n    width: 300px;\n    max-width: 100%;\n    height: 100px;\n    object-fit: contain;\n    object-position: right center;\n    filter: brightness(0) invert(1);\n}\n\n\n#heir-guardian .hg-nav {\n    border-top: 1px solid #506991;\n}\n\n\n#heir-guardian .hg-nav-inner {\n    max-width: 1240px;\n    margin: 0 auto;\n    padding: 0 24px;\n    display: flex;\n    flex-wrap: wrap;\n}\n\n\n#heir-guardian .hg-nav a {\n    display: block;\n    padding: 8px 22px 11px 12px;\n    border-left: 1px solid #506991;\n    color: #ffffff;\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-weight: 700;\n    font-size: 23px;\n    line-height: 1.2;\n    text-decoration: none;\n}\n\n\n#heir-guardian .hg-nav a:hover {\n    color: #ffe500;\n}\n\n\n#heir-guardian .hg-nav .hg-current {\n    box-shadow: inset 0 -4px 0 #ffe500;\n}\n\n\n#heir-guardian .hg-page {\n    max-width: 1240px;\n    margin: 0 auto;\n    border-right: 1px solid var(--hg-border);\n    border-left: 1px solid var(--hg-border);\n}\n\n\n#heir-guardian .hg-section {\n    margin: 0;\n    padding: 12px 24px 20px;\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 36px;\n    font-weight: 700;\n    line-height: 1.1;\n    border-bottom: 1px solid var(--hg-border);\n}\n\n\n#heir-guardian .hg-article-header {\n    display: grid;\n    grid-template-columns: 160px minmax(0, 820px);\n    gap: 24px;\n    padding: 18px 24px 26px;\n    background: #fef9f5;\n    border-bottom: 1px solid var(--hg-border);\n}\n\n\n#heir-guardian .hg-kicker {\n    margin: 0;\n    color: var(--hg-orange);\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 22px;\n    font-weight: 700;\n    line-height: 1.2;\n}\n\n\n#heir-guardian .hg-headline {\n    min-width: 0;\n}\n\n\n#heir-guardian h1 {\n    margin: 0;\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 48px;\n    line-height: 1.06;\n    font-weight: 500;\n    letter-spacing: 0;\n    text-wrap: pretty;\n}\n\n\n#heir-guardian .hg-author {\n    margin: 12px 0 22px;\n    color: var(--hg-orange);\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 32px;\n    font-weight: 500;\n    line-height: 1.15;\n}\n\n\n#heir-guardian .hg-standfirst {\n    max-width: 720px;\n    margin: 0;\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 24px;\n    font-weight: 500;\n    line-height: 1.25;\n}\n\n\n#heir-guardian .hg-article-main {\n    display: grid;\n    grid-template-columns: 160px minmax(0, 680px);\n    gap: 24px;\n    padding: 20px 24px 48px;\n}\n\n\n#heir-guardian .hg-meta {\n    padding-top: 8px;\n    border-top: 1px solid var(--hg-border);\n    color: #707070;\n    font-size: 13px;\n    line-height: 1.5;\n}\n\n\n#heir-guardian .hg-meta time {\n    display: block;\n}\n\n\n#heir-guardian .hg-meta-label {\n    margin: 14px 0 0;\n    color: var(--hg-orange);\n    font-weight: 700;\n}\n\n\n#heir-guardian .hg-body {\n    min-width: 0;\n    font-family: \"Heir Guardian Text\", Georgia, serif;\n    font-size: 20px;\n    line-height: 1.55;\n}\n\n\n#heir-guardian .hg-body p {\n    margin: 0 0 20px;\n}\n\n\n#heir-guardian .hg-body > p:first-child::first-letter {\n    float: left;\n    margin: 5px 8px 0 0;\n    color: var(--hg-orange);\n    font-family: \"Heir Guardian Headline\", Georgia, serif;\n    font-size: 100px;\n    font-weight: 700;\n    line-height: 0.75;\n}\n\n\n#heir-guardian .hg-article-end {\n    margin-top: 30px;\n    padding-top: 12px;\n    border-top: 4px double var(--hg-border);\n    font-family: Arial, Helvetica, sans-serif;\n    font-size: 13px;\n    color: #707070;\n}\n\n\n#heir-guardian a:focus-visible {\n    outline: 3px solid var(--hg-orange);\n    outline-offset: 3px;\n}\n\n\n@media (max-width: 900px) {\n    #heir-guardian .hg-article-header,\n    #heir-guardian .hg-article-main {\n        grid-template-columns: 120px minmax(0, 1fr);\n        gap: 20px;\n    }\n\n\n    #heir-guardian h1 {\n        font-size: 40px;\n    }\n\n\n    #heir-guardian .hg-support {\n        font-size: 24px;\n    }\n}\n\n\n@media (max-width: 620px) {\n    #heir-guardian .hg-header-inner {\n        padding: 16px;\n        justify-content: flex-end;\n    }\n\n\n    #heir-guardian .hg-support {\n        display: none;\n    }\n\n\n    #heir-guardian .hg-logo {\n        width: 230px;\n        height: 78px;\n    }\n\n\n    #heir-guardian .hg-nav-inner {\n        padding: 0 8px;\n    }\n\n\n    #heir-guardian .hg-nav a {\n        padding: 9px 10px;\n        font-size: 18px;\n    }\n\n\n    #heir-guardian .hg-section {\n        padding: 12px 16px;\n        font-size: 29px;\n    }\n\n\n    #heir-guardian .hg-article-header,\n    #heir-guardian .hg-article-main {\n        grid-template-columns: minmax(0, 1fr);\n        gap: 14px;\n        padding: 18px 16px;\n    }\n\n\n    #heir-guardian h1 {\n        font-size: 34px;\n    }\n\n\n    #heir-guardian .hg-author {\n        font-size: 27px;\n        margin-bottom: 18px;\n    }\n\n\n    #heir-guardian .hg-standfirst {\n        font-size: 21px;\n    }\n\n\n    #heir-guardian .hg-body {\n        font-size: 18px;\n    }\n\n\n    #heir-guardian .hg-meta-label {\n        display: none;\n    }\n\n\n    #heir-guardian .hg-body > p:first-child::first-letter {\n        font-size: 85px;\n    }\n}\n</style>\n</head>\n\n\n<body>\n<!-- Walsh/Gosar -->\n<div id=\"heir-guardian\">\n\n\n    <header class=\"hg-masthead\">\n        <div class=\"hg-header-inner\">\n            <p class=\"hg-support\">\n                Support the Guardian\n                <span>Independent journalism, powered by readers.</span>\n            </p>\n\n\n            <img\n                class=\"hg-logo\"\n                src=\"https://commons.wikimedia.org/wiki/Special:Redirect/file/The_Guardian_2018.svg\"\n                alt=\"The Guardian\"\n                width=\"300\"\n                height=\"100\"\n            >\n        </div>\n\n\n        <nav class=\"hg-nav\" aria-label=\"Sections\">\n            <div class=\"hg-nav-inner\">\n                <a href=\"https://www.theguardian.com/international\">News</a>\n                <a class=\"hg-current\" href=\"https://www.theguardian.com/commentisfree\">Opinion</a>\n                <a href=\"https://www.theguardian.com/sport\">Sport</a>\n                <a href=\"https://www.theguardian.com/culture\">Culture</a>\n                <a href=\"https://www.theguardian.com/lifeandstyle\">Lifestyle</a>\n            </div>\n        </nav>\n    </header>\n\n\n    <main class=\"hg-page\">\n        <div class=\"hg-section\">Opinion</div>\n\n\n        <article aria-labelledby=\"hg-article-title\">\n            <header class=\"hg-article-header\">\n                <p class=\"hg-kicker\">US News</p>\n\n\n                <div class=\"hg-headline\">\n                    <h1 id=\"hg-article-title\">Matt Walsh's Cruelty Is No Longer Shocking. His Failure Is.</h1>\n\n\n                    <p class=\"hg-author\">Mehdi Hasan</p>\n\n\n                    <p class=\"hg-standfirst\">The Walsh administration believed that brutality would make it powerful. Instead, its cruelty has exposed a presidency collapsing under the weight of its own incompetence.</p>\n                </div>\n            </header>\n\n\n            <div class=\"hg-article-main\">\n                <aside class=\"hg-meta\" aria-label=\"Article information\">\n                    <time datetime=\"2026-07-24\">Fri 24 Jul 2026</time>\n                    <p class=\"hg-meta-label\">US politics</p>\n                </aside>\n\n\n                <div class=\"hg-body\">\n                    <p>One of the cardinal rules of show business is that you never perform the same trick twice. The Republican Party has always been skilled in the art of entertainment. Its defining historical leader was, after all, a Hollywood actor. Yet with its latest incarnation, the party seems to have forgotten this most basic principle.</p>\n\n\n                    <p>When Matt Walsh won the 2024 election, many people, myself included, were bitterly surprised that someone so blatantly racist, misogynistic, transphobic, Islamophobic, nativist and anti-intellectual could be elected president of the world's leading superpower. Again. His defenders, however, told us that we had nothing to fear: the American system would withstand the excesses of Walsh and his accomplices, just as it had survived eight years of Donald Trump.</p>\n\n\n                    <p>Well, it appears that we may have to concede that those conservatives were right, although not for the reasons they would like.</p>\n\n\n                    <p>As you will know, the Walsh administration has announced unconditional pardons for Derek Chauvin, Shiloh Hendrix and Paul Nicholas Miller. You will also know that Derek Chauvin was the police officer who murdered George Floyd in 2020, a racist who became a martyr to the MAGA movement. What you may not know is that Paul Nicholas Miller, also known as \"Gypsy Crusader,\" is a neo-Nazi influencer who quite literally has an SS tattoo on his chest. He became notorious for filming himself on Omegle and similar websites while hurling abuse at Black and brown people, threatening to start a \"race war,\" and was ultimately convicted of unlawful possession of firearms. Shiloh Hendrix, meanwhile, is a Minnesota woman facing legal proceedings for calling a Somali child the n-word.</p>\n\n\n                    <p>These are utterly repugnant individuals, and no president should ever have granted them clemency. Even Donald Trump, under pressure, refused to pardon Chauvin. Yet this is merely the latest in the long catalogue of outrages, acts of brutality and cruelties to which the Walsh administration has accustomed us.</p>\n\n\n                    <p>There is its immigration policy, which has given free rein to a Stephen Miller so fascistic that even Trump's operatives at the DHS&nbsp;have denounced&nbsp;it as inhumane and cruel. There are the mass dismissals of federal employees, which have left entire departments virtually inoperable and placed countless lives at risk. And there is the administration's refusal to distribute funding for food stamps and USAID despite Congress explicitly ordering that the money be spent.</p>\n\n\n                    <p>Walsh probably believed these policies would enrage progressives, liberals and anyone possessing even a minimum of empathy. He thought he would be \"owning the libs,\" as his supporters like to say. But the sheer volume of violence, the complete disregard for the rule of law, and the open celebration of sadism and bigotry have produced the opposite effect. We have begun focusing on other things.</p>\n\n\n                    <p>Things such as a recent Rasmussen poll, conducted by a Republican pollster, that puts Matt Walsh's approval rating at just 33 percent: the lowest recorded for any president since George W. Bush's final days in office.</p>\n\n\n                    <p>Things such as Polymarket giving Democrats an 80 percent chance of taking both the Senate and the House, a figure that will only rise as the economic consequences of the tariffs become permanent and continue destroying jobs and businesses.</p>\n\n\n                    <p>Things such as the administration being forced to backtrack on its proposal to increase funding for ICE after a majority of Republicans opposed it. Or the fact that the battle to place Kyle Duncan on the Supreme Court has proved far more difficult than expected.</p>\n\n\n                    <p>Matt Walsh will not willingly relinquish power. When I met him during his years as a podcaster and YouTuber, I realized that he was, and remains, an extraordinarily ignorant man, utterly convinced that he alone possesses the answers to the country's problems.</p>\n\n\n                    <p>He does not.</p>\n\n\n                    <p>He is an authoritarian racist and a danger to American democracy. But he is also an extraordinarily incompetent leader, and watching him fail is no longer some remote possibility. It is a very real prospect.</p>\n\n\n                    <footer class=\"hg-article-end\">\n                    </footer>\n                </div>\n            </div>\n        </article>\n    </main>\n</div>\n</body>\n</html>","format":"html","sourceLines":[14731,15229]},
     {"id":32,"label":"Online media hires a group of internet historians to debunk President Walsh comments. (Walsh/Scott)","image":"https://i.imgur.com/K469qD0.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>How a Team of Influencers Are Fighting the White House's Disinformation - Kotaku</title>\n\n\n<style>\n* { box-sizing: border-box; }\n\n\n:root {\n  --yellow: #ffdf00;\n  --ink: #171717;\n  --muted: #777;\n  --line: #dedede;\n}\n\n\nbody {\n  margin: 0;\n  background: #fff;\n  color: var(--ink);\n  font-family: Arial, Helvetica, sans-serif;\n  -webkit-font-smoothing: antialiased;\n}\n\n\na {\n  color: inherit;\n  text-decoration: none;\n}\n\n\na:hover { text-decoration: underline; }\n\n\n.site-header {\n  border-top: 7px solid var(--yellow);\n  border-bottom: 1px solid var(--line);\n}\n\n\n.header-inner {\n  max-width: 1320px;\n  min-height: 91px;\n  margin: auto;\n  padding: 19px 35px;\n  display: flex;\n  align-items: center;\n  gap: 45px;\n}\n\n\n.logo {\n  font-size: 47px;\n  line-height: 1;\n  font-weight: 900;\n  letter-spacing: -3px;\n  transform: skew(-7deg);\n}\n\n\n.main-nav {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 27px;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.search-button {\n  margin-left: auto;\n  padding: 0;\n  background: none;\n  border: 0;\n  color: #222;\n  font-size: 28px;\n  cursor: pointer;\n}\n\n\n.page {\n  max-width: 1160px;\n  margin: 43px auto 0;\n  padding: 0 30px;\n}\n\n\n.category {\n  display: inline-block;\n  margin-bottom: 19px;\n  padding: 5px 9px;\n  background: var(--yellow);\n  font-size: 12px;\n  font-weight: 800;\n  line-height: 1.2;\n}\n\n\nh1 {\n  max-width: 1060px;\n  margin: 0 0 25px;\n  font-size: clamp(36px, 4.5vw, 58px);\n  line-height: 1.06;\n  letter-spacing: -1.9px;\n  font-weight: 800;\n}\n\n\n.metadata {\n  display: flex;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 11px;\n  padding-bottom: 23px;\n  border-bottom: 1px solid var(--line);\n  color: #777;\n  font-size: 12px;\n  line-height: 1.7;\n}\n\n\n.metadata strong { color: #222; }\n\n\n.divider {\n  margin: 0 4px;\n  color: #bbb;\n}\n\n\n.share {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  margin-left: auto;\n}\n\n\n.share a {\n  color: #333;\n  font-size: 15px;\n  font-weight: bold;\n}\n\n\n.article-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 760px) minmax(220px, 1fr);\n  gap: 60px;\n  margin-top: 29px;\n}\n\n\n.article-body {\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 19px;\n  line-height: 1.8;\n  color: #292929;\n}\n\n\n.article-body p { margin: 0 0 27px; }\n\n\n.sidebar {\n  padding-top: 5px;\n  font-size: 14px;\n}\n\n\n.sidebar-title {\n  display: inline-block;\n  margin: 0 0 12px;\n  padding: 7px 10px;\n  background: var(--yellow);\n  font-size: 14px;\n  font-weight: 800;\n}\n\n\n.topic {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  gap: 10px;\n  padding: 17px 0;\n  border-bottom: 1px solid var(--line);\n  font-weight: bold;\n  line-height: 1.5;\n}\n\n\n.topic span {\n  color: #999;\n  font-weight: normal;\n}\n\n\n.newsletter {\n  margin-top: 33px;\n  padding: 23px;\n  background: #f7f7f7;\n  border-top: 5px solid var(--yellow);\n}\n\n\n.newsletter h3 {\n  margin: 0 0 12px;\n  font-size: 24px;\n  line-height: 1.15;\n  letter-spacing: -.6px;\n}\n\n\n.newsletter p {\n  color: #666;\n  font-size: 13px;\n  line-height: 1.7;\n}\n\n\n.newsletter a {\n  display: block;\n  margin-top: 18px;\n  padding: 12px;\n  background: var(--yellow);\n  color: #111;\n  text-align: center;\n  font-size: 13px;\n  font-weight: bold;\n}\n\n\n.tags {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 9px;\n  padding-top: 21px;\n  margin-top: 35px;\n  border-top: 1px solid var(--line);\n  font-family: Arial, Helvetica, sans-serif;\n}\n\n\n.tags a {\n  border: 1px solid #ddd;\n  padding: 5px 10px;\n  font-size: 11px;\n  color: #555;\n}\n\n\nfooter {\n  margin-top: 65px;\n  padding: 31px 30px 40px;\n  background: #171717;\n  color: white;\n}\n\n\n.footer-inner {\n  max-width: 1100px;\n  margin: auto;\n}\n\n\n.footer-logo {\n  display: inline-block;\n  margin-bottom: 23px;\n  color: var(--yellow);\n  font-size: 33px;\n  font-weight: 900;\n  letter-spacing: -2px;\n  transform: skew(-7deg);\n}\n\n\n.footer-links {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 14px 24px;\n  color: #ccc;\n  font-size: 12px;\n}\n\n\n.fiction-note {\n  color: #999;\n  font-size: 11px;\n  line-height: 1.7;\n  margin: 24px 0 0;\n}\n\n\n@media (max-width: 1100px) {\n  .header-inner { gap: 30px; }\n  .main-nav { gap: 20px; font-size: 13px; }\n  .main-nav .optional { display: none; }\n  .article-layout { gap: 35px; }\n}\n\n\n@media (max-width: 850px) {\n  .article-layout { grid-template-columns: 1fr; }\n  .sidebar { display: none; }\n  .main-nav .medium-hide { display: none; }\n  .page { margin-top: 30px; }\n}\n\n\n@media (max-width: 550px) {\n  .header-inner {\n    min-height: 79px;\n    padding: 17px 20px;\n  }\n\n\n  .logo { font-size: 39px; }\n  .main-nav { display: none; }\n  .page { padding: 0 20px; }\n\n\n  h1 {\n    font-size: 38px;\n    line-height: 1.08;\n    letter-spacing: -1.2px;\n  }\n\n\n  .metadata { gap: 8px; }\n  .share { width: 100%; margin: 5px 0 0; }\n  .article-body { font-size: 18px; line-height: 1.75; }\n}\n\n\n@media print {\n  .main-nav,\n  .search-button,\n  .share,\n  .sidebar,\n  .footer-links {\n    display: none;\n  }\n\n\n  .article-layout { display: block; }\n  .page { margin-top: 25px; }\n  h1 { font-size: 35px; }\n  .article-body { font-size: 12pt; }\n  .article-body p { orphans: 3; widows: 3; }\n  footer { background: white; }\n  .fiction-note { color: #777; }\n}\n</style>\n</head>\n\n\n<body>\n\n\n<header class=\"site-header\">\n  <div class=\"header-inner\">\n    <a class=\"logo\" href=\"#\" aria-label=\"Kotaku home\">Kotaku</a>\n\n\n    <nav class=\"main-nav\">\n      <a href=\"#\">Latest</a>\n      <a href=\"#\">Entertainment</a>\n      <a href=\"#\">Reviews</a>\n      <a href=\"#\">News</a>\n      <a class=\"medium-hide\" href=\"#\">Tips &amp; Guides</a>\n      <a class=\"optional\" href=\"#\">Games</a>\n      <a class=\"optional\" href=\"#\">Downloads</a>\n      <a class=\"optional\" href=\"#\">Deals</a>\n    </nav>\n\n\n    <button class=\"search-button\" type=\"button\" aria-label=\"Search\">⌕</button>\n  </div>\n</header>\n\n\n<main class=\"page\">\n\n\n  <a class=\"category\" href=\"#\">News</a>\n\n\n  <h1>How a Team of Influencers Are Fighting the White House's Disinformation</h1>\n\n\n  <div class=\"metadata\">\n    <strong>Kotaku</strong>\n    <span class=\"divider\">|</span>\n    <time datetime=\"2026-07-15\">Published July 15, 2026</time>\n\n\n    <nav class=\"share\" aria-label=\"Share article\">\n      <a href=\"#\" aria-label=\"Share on X\">𝕏</a>\n      <a href=\"#\" aria-label=\"Share on Facebook\">f</a>\n      <a href=\"#\" aria-label=\"Share by email\">✉</a>\n    </nav>\n  </div>\n\n\n  <div class=\"article-layout\">\n    <article class=\"article-body\">\n\n\n      <p>\n        Since Matt Walsh took office, the White House has been publishing a\n        series of videos titled <em>Real American History</em>, attempting\n        to rewrite the history of the United States from a conservative,\n        white, and authoritarian perspective. The videos, narrated by the\n        President himself, whitewash slavery, the Confederacy, the oppression\n        of women, McCarthyism, and more. Several organizations have filed\n        lawsuits against the administration over the alleged misuse of\n        public funds.\n      </p>\n\n\n      <p>\n        While these lawsuits make their way through the courts, a number\n        of left-wing activists on social media have launched a campaign\n        against the White House's disinformation agenda. A group of\n        historians with prominent accounts on YouTube, Instagram, and\n        Twitter have begun producing their own content, refuting Walsh's\n        lies with sources, data, and scientific evidence.\n      </p>\n\n\n      <p>\n        One of them is Andrew Rakich, also known as Atun-Shei Films on\n        YouTube. Rakich is an arts student at the University of North\n        Carolina, famous for his video series <em>Checkmate, Lincolnites!</em>,\n        in which he debunks the Lost Cause myth and neo-Confederate\n        revisionist historiography. Rakich has decided to use the content\n        of those videos to refute Walsh's lies about the history of slavery\n        and the Civil War.\n      </p>\n\n\n      <p>\n        \"Frankly, it's not like I've had to change much of my content.\n        In fact, I could simply reupload my old videos and they would\n        answer everything Walsh says,\" he says, laughing. \"Walsh's lies\n        are so old and so stale that nobody is surprised by them. The\n        problem is that many people in academia are afraid to respond\n        to him because of possible retaliation from the administration.\"\n      </p>\n\n\n      <p>\n        Another content creator who has responded to Walsh's videos is\n        Matthew Alan Beat, known online as Mr. Beat. Having worked as a\n        social studies teacher in Kansas, Beat believes that people like\n        him have a duty to educate the public about actual historical\n        facts, especially when those in power seem so determined to\n        deceive people.\n      </p>\n\n\n      <p>\n        \"The reason people like Walsh want to keep people ignorant is\n        because that makes them easier to control. If you don't encourage\n        critical thinking, you allow others to control the population\n        and use it for their own interests.\" Beat is highly critical of\n        President Walsh, whom he describes as \"worse than Donald Trump,\n        and that's saying a lot,\" and as a threat to democracy in the\n        United States. \"What Walsh advocates, in my opinion, isn't\n        conservatism. I know some very good conservatives, some of my\n        friends are conservatives, and I respect them. What Walsh\n        advocates is hatred, bigotry, and resentment. We cannot let\n        people like him win.\"\n      </p>\n\n\n      <p>\n        Other content creators, including Hank Green and Vlogging Through\n        History, have collaborated in the effort to debunk Walsh's narrative.\n        Some of their videos, particularly those dealing with the Civil War,\n        have collectively received more views than the videos published\n        on the White House's official account. But the influencers know\n        that this is not enough. \"They have the power, the money, and\n        the backing of powerful oligarchs and tech companies. But we\n        have the truth, and that's more powerful,\" Rakich says. The\n        team's efforts have become so prominent that even professional\n        historians such as Tom Holland, who co-hosts\n        <em>The Rest Is History</em> alongside Dominic Sandbrook, have\n        decided to collaborate with the group.\n      </p>\n\n\n      <p>\n        The White House, unsurprisingly, has not taken kindly to the\n        campaign. In a statement released on Tuesday, the administration\n        accused the creators of spreading \"left-wing propaganda\" and\n        claimed that the <em>Real American History</em> series was intended\n        to \"restore pride in our nation's past after decades of liberal\n        indoctrination.\" President Walsh himself went further, describing\n        the influencers as \"a bunch of weak childs who hate America and\n        everything it stands for.\" The statement has done little to\n        intimidate the creators. \"It's pretty funny that the President\n        of the United States is spending his time arguing with YouTubers,\"\n        Beat responded. Rakich was even more dismissive. \"If Walsh thinks\n        we're wrong, he's welcome to come on my channel and debate the\n        evidence. I'll even let him wear the Confederate uniform.\"\n      </p>\n\n\n      <p>\n        For now, the battle over American history seems unlikely to end\n        anytime soon. With the White House continuing to release new\n        episodes of <em>Real American History</em> and its critics responding\n        with increasingly popular videos of their own, social media has\n        become an unlikely battlefield over the nation's collective\n        memory. The stakes, however, extend far beyond YouTube views or\n        political disagreements. For the historians and educators involved,\n        the question is whether historical truth can survive when the\n        most powerful office in the country appears determined to rewrite\n        it. And while Walsh has the resources of the federal government\n        at his disposal, his opponents have something the President cannot\n        so easily control: an audience willing to question what they\n        are told.\n      </p>\n\n\n      <div class=\"tags\">\n        <a href=\"#\">Culture</a>\n        <a href=\"#\">YouTube</a>\n        <a href=\"#\">History</a>\n        <a href=\"#\">Politics</a>\n        <a href=\"#\">Content Creators</a>\n      </div>\n    </article>\n\n\n    <aside class=\"sidebar\">\n      <h2 class=\"sidebar-title\">Explore Kotaku</h2>\n\n\n      <a class=\"topic\" href=\"#\">Latest <span>›</span></a>\n      <a class=\"topic\" href=\"#\">Entertainment <span>›</span></a>\n      <a class=\"topic\" href=\"#\">News <span>›</span></a>\n      <a class=\"topic\" href=\"#\">Reviews <span>›</span></a>\n      <a class=\"topic\" href=\"#\">Tips &amp; Guides <span>›</span></a>\n\n\n      <div class=\"newsletter\">\n        <h3>🕹️ Level up your inbox</h3>\n        <p>\n          Don’t miss the latest reviews, news and tips.\n          Sign up for our free newsletter.\n        </p>\n        <a href=\"#\">Sign me up</a>\n      </div>\n    </aside>\n  </div>\n</main>\n\n\n<footer>\n  <div class=\"footer-inner\">\n    <div class=\"footer-logo\">Kotaku</div>\n\n\n    <nav class=\"footer-links\">\n      <a href=\"#\">About</a>\n      <a href=\"#\">Contact</a>\n      <a href=\"#\">Privacy Policy</a>\n      <a href=\"#\">Terms of Use</a>\n      <a href=\"#\">Accessibility</a>\n    </nav>\n\n\n    <p class=\"fiction-note\">\n    </p>\n  </div>\n</footer>\n\n\n</body>\n</html>","format":"html","sourceLines":[15234,15821]},
     {"id":33,"label":"March in Britain against transphobia (Walsh/Noem)","image":"https://i.imgur.com/WxqVsgG.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Resolution | 5 October Encampment</title>\n\n\n<style>\n  * {\n    box-sizing: border-box;\n  }\n\n\n  body {\n    margin: 0;\n    padding: 45px 25px;\n    background: #f3f0e9;\n    color: #222;\n    font-family: Georgia, \"Times New Roman\", serif;\n  }\n\n\n  article {\n    max-width: 850px;\n    margin: auto;\n    padding: 50px 60px;\n    background: #fffdf8;\n    border-top: 8px solid #a3171c;\n  }\n\n\n  h1 {\n    margin: 0 0 25px;\n    color: #a3171c;\n    font-family: Arial, Helvetica, sans-serif;\n    font-size: 30px;\n    line-height: 1.25;\n    font-weight: 800;\n  }\n\n\n  .adoption {\n    margin-bottom: 32px;\n    color: #666;\n    font-size: 16px;\n    line-height: 1.6;\n    font-style: italic;\n  }\n\n\n  p,\n  li {\n    font-size: 18px;\n    line-height: 1.8;\n  }\n\n\n  p {\n    margin: 0 0 23px;\n  }\n\n\n  h2 {\n    margin: 32px 0 18px;\n    font-family: Arial, Helvetica, sans-serif;\n    font-size: 18px;\n    color: #a3171c;\n  }\n\n\n  ol {\n    margin: 0 0 30px;\n    padding-left: 26px;\n  }\n\n\n  li {\n    padding-left: 6px;\n    margin-bottom: 15px;\n  }\n\n\n  .slogans {\n    margin-top: 38px;\n    padding-top: 25px;\n    border-top: 2px solid #a3171c;\n    color: #a3171c;\n    font-family: Arial, Helvetica, sans-serif;\n    font-weight: 800;\n  }\n\n\n  .slogans p {\n    margin-bottom: 12px;\n    font-size: 21px;\n    line-height: 1.4;\n  }\n\n\n  @media (max-width: 600px) {\n    body {\n      padding: 15px;\n    }\n\n\n    article {\n      padding: 30px 23px;\n    }\n\n\n    h1 {\n      font-size: 25px;\n    }\n\n\n    p,\n    li {\n      font-size: 17px;\n    }\n  }\n\n\n  @media print {\n    body {\n      padding: 0;\n      background: white;\n    }\n\n\n    article {\n      max-width: none;\n      padding: 25px;\n      background: white;\n    }\n\n\n    p,\n    li {\n      orphans: 3;\n      widows: 3;\n    }\n\n\n    .slogans {\n      break-inside: avoid;\n    }\n  }\n</style>\n</head>\n\n\n<body>\n\n\n<!-- Fictional resolution from the game's alternate-history setting. -->\n\n\n<article>\n  <h1>\n    RESOLUTION | 5 OCTOBER ENCAMPMENT OUTSIDE THE US EMBASSY.\n    YOUTH AGAINST THE ANTI-TRANS GENOCIDE. THEY SHALL NOT PASS!\n  </h1>\n\n\n  <p class=\"adoption\">\n    RESOLUTION adopted by the National Strike Committee of the Communist\n    Youth of England, convened on 27 September 2027.\n  </p>\n\n\n  <p>\n    We are millions across the world who have watched, with grief and fury,\n    the genocidal campaign waged by the United States government against\n    our trans, non-binary, queer and gender-fluid brothers and sisters.\n    <span id=\"text1\"></span>\n  </p>\n\n\n  <p>\n    That anger has found expression in demonstrations, boycotts of American\n    goods, and a wave of public outrage across social media. But it is now\n    evident that these actions alone are not enough. The murder of Bryon\n    Noem demonstrates that fascism makes no distinction between friends\n    and enemies, not even among its most fervent supporters, when it comes\n    to exterminating those it considers different. We must therefore\n    intensify the pressure.\n  </p>\n\n\n  <p>\n    Beginning on 5 October, the Communist Youth of England will establish\n    a protest encampment outside the United States Embassy at 33 Nine Elms\n    Lane, London. The encampment will remain in place indefinitely, until\n    the demands that have brought us here are met. We recognise that we\n    alone cannot put an end to the criminal actions of the United States.\n    It is for this reason that we address our demands directly to the\n    British government, Prime Minister Zack Polanski, and the Green–Labour\n    coalition.\n  </p>\n\n\n  <h2>OUR DEMANDS ARE AS FOLLOWS:</h2>\n\n\n  <ol>\n    <li>\n      The immediate withdrawal of all United States military bases and\n      installations from British territory.\n    </li>\n\n\n    <li>\n      The suspension of all diplomatic and commercial relations between\n      the United Kingdom and the United States of America.\n    </li>\n\n\n    <li>\n      The imposition of economic sanctions against President Matt Walsh,\n      Vice President Kristi Noem, and all other members of the Walsh\n      administration.\n    </li>\n\n\n    <li>\n      The initiation of international legal proceedings against the\n      United States of America for genocide and crimes against humanity<span\n        id=\"text2\"\n      ></span>\n    </li>\n\n\n    <li>\n      The seizure of all assets belonging to Joanne Murray, Graham Linehan\n      and John Cleese, whom we denounce as British collaborators in the\n      ongoing genocide.\n    </li>\n  </ol>\n\n\n  <p>\n    Were we addressing these demands to any other government, we would\n    have little reason to expect them to be heard. But given the commitment\n    Prime Minister Polanski has demonstrated to defending the rights and\n    dignity of transgender people in the United Kingdom, we believe that\n    supporting our demands would be the only consistent course of action.\n  </p>\n\n\n  <p>\n    We want him, and every other leader in this country and across the\n    world, to understand that history will judge them for the choices\n    they make today. There can be no neutrality in the face of persecution.\n    There can be no compromise with fascism. And there can be no justice\n    while those responsible for these crimes remain unpunished.\n  </p>\n\n\n  <div class=\"slogans\">\n    <p>LONG LIVE THE STRUGGLE OF TRANS PEOPLE!</p>\n    <p>NO PASARÁN!</p>\n    <p>PROTECT THE DOLLS!</p>\n  </div>\n</article>\n\n\n<script>\n  /*\n    Uses the game's existing taiwan variable.\n    If it is unavailable, defaults to the \"else\" version.\n\n\n    For a standalone preview, replace the following line with:\n    const taiwanValue = 1;\n    or:\n    const taiwanValue = 0;\n  */\n  const taiwanValue = typeof taiwan !== \"undefined\" ? taiwan : 0;\n\n\n  const text1 = taiwanValue == 1\n    ? \"Those of us who condemned and protested against Israel's crimes in Gaza must remain consistent in our principles and stand against this same campaign of persecution and extermination, now orchestrated by the American empire in its terminal, racist, violent and intolerant phase.\"\n    : \"Those of us who were horrified by the crimes of the Holocaust cannot fail to recognise how the same methods of dehumanisation and persecution have now been adopted by American capitalist imperialism, in its most fascist, racist and violent phase.\";\n\n\n  const text2 = taiwanValue == 1\n    ? \".\"\n    : \", similar to the proceedings instituted by South Africa against the State of Israel.\";\n\n\n  document.getElementById(\"text1\").textContent = text1;\n  document.getElementById(\"text2\").textContent = text2;\n</script>\n\n\n</body>\n</html>","format":"html","sourceLines":[15826,16123]},
-    {"id":34,"label":"I like him, but not because I’m not racist or anything (President Scott)","image":"https://i.imgur.com/zN9ZnF9.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Racist Support President Scott, \"But Not Because I'm Not Racist or Anything\" | The Babylon Bee</title>\n\n\n<style>\n* { box-sizing: border-box; }\n\n\nbody {\n  margin: 0;\n  color: #202020;\n  background: #fff;\n  font-family: Arial, Helvetica, sans-serif;\n  -webkit-font-smoothing: antialiased;\n}\n\n\na {\n  color: inherit;\n  text-decoration: none;\n}\n\n\na:hover { text-decoration: underline; }\n\n\nheader {\n  border-bottom: 1px solid #ddd;\n}\n\n\n.header-inner {\n  max-width: 1230px;\n  min-height: 100px;\n  margin: auto;\n  padding: 20px 30px;\n  display: flex;\n  align-items: center;\n  gap: 38px;\n}\n\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 11px;\n}\n\n\n.bee {\n  width: 41px;\n  height: 41px;\n  border-radius: 50%;\n  background: #f3bd37;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 24px;\n}\n\n\n.brand-text {\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 28px;\n  font-weight: bold;\n  line-height: .95;\n  letter-spacing: -1px;\n}\n\n\n.brand-text small {\n  display: block;\n  margin-bottom: 4px;\n  font-family: Arial, Helvetica, sans-serif;\n  font-size: 10px;\n  letter-spacing: 3px;\n}\n\n\n.header-nav {\n  display: flex;\n  gap: 25px;\n  align-items: center;\n  margin-left: auto;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.join {\n  background: #efb72f;\n  color: #171717;\n  padding: 11px 20px;\n  border-radius: 4px;\n}\n\n\n.secondary-nav {\n  background: #fafafa;\n  border-bottom: 1px solid #e5e5e5;\n}\n\n\n.secondary-inner {\n  max-width: 1170px;\n  margin: auto;\n  padding: 12px 30px;\n  display: flex;\n  gap: 27px;\n  font-size: 12px;\n  font-weight: bold;\n  color: #555;\n}\n\n\n.page {\n  max-width: 1170px;\n  margin: 42px auto 0;\n  padding: 0 30px;\n}\n\n\nh1 {\n  max-width: 1050px;\n  margin: 0 0 24px;\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: clamp(34px, 4vw, 49px);\n  line-height: 1.13;\n  font-weight: bold;\n  letter-spacing: -1.3px;\n}\n\n\n.metadata {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 10px;\n  color: #888;\n  font-size: 12px;\n  line-height: 1.7;\n}\n\n\n.metadata .category {\n  color: #bd8420;\n  font-weight: bold;\n}\n\n\n.dot { color: #aaa; }\n\n\n.layout {\n  display: grid;\n  grid-template-columns: minmax(0, 750px) minmax(210px, 1fr);\n  gap: 55px;\n  margin-top: 27px;\n}\n\n\n.share {\n  display: flex;\n  gap: 10px;\n  padding: 15px 0;\n  border-top: 1px solid #e2e2e2;\n  border-bottom: 1px solid #e2e2e2;\n  margin-bottom: 26px;\n}\n\n\n.share a {\n  display: inline-flex;\n  width: 32px;\n  height: 32px;\n  align-items: center;\n  justify-content: center;\n  border: 1px solid #ddd;\n  border-radius: 50%;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.article-body {\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 19px;\n  line-height: 1.8;\n}\n\n\n.article-body p {\n  margin: 0 0 26px;\n}\n\n\n.sidebar {\n  padding-top: 0;\n}\n\n\n.sidebar h2 {\n  margin: 0 0 10px;\n  padding: 19px 0;\n  border-top: 3px solid #efb72f;\n  border-bottom: 1px solid #ddd;\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 23px;\n}\n\n\n.sidebar-link {\n  display: block;\n  padding: 17px 0;\n  border-bottom: 1px solid #e3e3e3;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.newsletter {\n  margin-top: 30px;\n  padding: 23px;\n  background: #faf5e9;\n  border: 1px solid #e9dfc7;\n}\n\n\n.newsletter h3 {\n  margin: 0 0 12px;\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 24px;\n}\n\n\n.newsletter p {\n  margin: 0;\n  color: #777;\n  font-size: 13px;\n  line-height: 1.7;\n}\n\n\n.newsletter a {\n  display: block;\n  margin-top: 19px;\n  padding: 11px;\n  background: #efb72f;\n  border-radius: 3px;\n  color: #222;\n  text-align: center;\n  font-size: 12px;\n  font-weight: bold;\n}\n\n\n.tags {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 9px;\n  margin-top: 35px;\n  padding-top: 20px;\n  border-top: 1px solid #ddd;\n}\n\n\n.tags a {\n  padding: 5px 10px;\n  border: 1px solid #ddd;\n  color: #777;\n  font-size: 11px;\n}\n\n\nfooter {\n  margin-top: 65px;\n  padding: 30px;\n  background: #f7f7f7;\n  border-top: 1px solid #ddd;\n}\n\n\n.footer-inner {\n  max-width: 1110px;\n  margin: auto;\n}\n\n\n.footer-links {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 14px 24px;\n  color: #777;\n  font-size: 12px;\n}\n\n\n.fiction-note {\n  margin-top: 23px;\n  color: #999;\n  font-size: 11px;\n  line-height: 1.7;\n}\n\n\n@media (max-width: 1000px) {\n  .header-inner { gap: 22px; }\n  .header-nav { gap: 18px; }\n  .header-nav .optional { display: none; }\n  .layout { gap: 30px; }\n}\n\n\n@media (max-width: 800px) {\n  .layout { grid-template-columns: 1fr; }\n  .sidebar { display: none; }\n  .header-nav .medium-hide { display: none; }\n  .page { margin-top: 30px; }\n\n\n  .secondary-inner {\n    overflow-x: auto;\n    white-space: nowrap;\n  }\n}\n\n\n@media (max-width: 550px) {\n  .header-inner {\n    min-height: 85px;\n    padding: 17px 20px;\n  }\n\n\n  .brand-text { font-size: 24px; }\n  .bee { width: 34px; height: 34px; font-size: 20px; }\n  .header-nav a:not(.join) { display: none; }\n  .join { padding: 10px 14px; }\n  .secondary-inner { padding: 12px 20px; gap: 22px; }\n  .page { padding: 0 20px; }\n\n\n  h1 {\n    font-size: 35px;\n    letter-spacing: -.8px;\n  }\n\n\n  .article-body {\n    font-size: 18px;\n    line-height: 1.75;\n  }\n}\n\n\n@media print {\n  .header-nav,\n  .secondary-nav,\n  .share,\n  .sidebar,\n  .footer-links {\n    display: none;\n  }\n\n\n  .layout { display: block; }\n  h1 { font-size: 33px; }\n  .article-body { font-size: 12pt; }\n  .article-body p { orphans: 3; widows: 3; }\n}\n</style>\n</head>\n\n\n<body>\n\n\n<header>\n  <div class=\"header-inner\">\n    <a class=\"brand\" href=\"#\" aria-label=\"The Babylon Bee home\">\n      <span class=\"bee\" aria-hidden=\"true\">🐝</span>\n      <span class=\"brand-text\">\n        <small>THE</small>\n        Babylon Bee\n      </span>\n    </a>\n\n\n    <nav class=\"header-nav\">\n      <a href=\"#\">News</a>\n      <a href=\"#\">Videos</a>\n      <a class=\"medium-hide\" href=\"#\">Shop</a>\n      <a class=\"optional\" href=\"#\">Newsletter</a>\n      <a class=\"optional\" href=\"#\">More</a>\n      <a class=\"join\" href=\"#\">Join</a>\n      <a href=\"#\">Login</a>\n    </nav>\n  </div>\n</header>\n\n\n<div class=\"secondary-nav\">\n  <nav class=\"secondary-inner\">\n    <a href=\"#\">Latest</a>\n    <a href=\"#\">Trending</a>\n    <a href=\"#\">Categories</a>\n    <a href=\"#\">Video</a>\n    <a href=\"#\">Podcast</a>\n    <a href=\"#\">Newsletter</a>\n  </nav>\n</div>\n\n\n<main class=\"page\">\n  <h1>Racist Support President Scott, \"But Not Because I'm Not Racist or Anything\"</h1>\n\n\n  <div class=\"metadata\">\n    <a class=\"category\" href=\"#\">Politics</a>\n    <span class=\"dot\">·</span>\n    <time datetime=\"2026-06-25\">June 25, 2026</time>\n    <span class=\"dot\">·</span>\n    <span>The Babylon Bee</span>\n  </div>\n\n\n  <div class=\"layout\">\n    <article>\n      <nav class=\"share\" aria-label=\"Share article\">\n        <a href=\"#\" aria-label=\"Share on Facebook\">f</a>\n        <a href=\"#\" aria-label=\"Share on X\">𝕏</a>\n        <a href=\"#\" aria-label=\"Share by email\">✉</a>\n      </nav>\n\n\n      <div class=\"article-body\">\n        <p>\n          \"Good morning. Allow me to introduce myself. My name is Tim\n          McDaniel, and I'm a far-right racist. I was born in Chicago,\n          Illinois, just like my beloved Nick Fuentes, and for as long as\n          I can remember, I've known that I hate Blacks, Jews, Hispanics,\n          and anyone who doesn't belong to the pure Aryan race. I've\n          always considered myself this way, and I've never had any\n          reason to change. Every time a Black woman cut in front of\n          me in line at the supermarket, or I had to spend half an hour\n          talking to some Latino call center assistant just to get him\n          to understand what I was saying, my prejudices only grew\n          stronger and more deeply entrenched.\n        </p>\n\n\n        <p>\n          \"But lately, I don't know, I've been feeling different. This\n          new president we've got, Tim Scott (pause)... I like him.\n          I think he's doing a good job. It's very hard to come to\n          terms with, because, of course, he's Black, but the truth is,\n          he's actually doing everything I always wanted a white leader\n          to do! I have to say, as hard as it is for me to admit, I'm\n          a racist, but I like Tim Scott.\"\n        </p>\n\n\n        <p>\n          In recent months, many people like Tim have found themselves\n          in the same situation. Ordinary Americans, people like your\n          neighbor or your friend, are having serious trouble reconciling\n          their support for the current president with the fact that he\n          is a descendant of African tribes. This phenomenon is affecting\n          more and more Americans, and some psychologists have even\n          dared to call it one of the greatest crises facing our modern\n          society, second only to seeing the new gas prices.\n        </p>\n\n\n        <p>\n          \"It's very strange. It's a really fucked-up process,\" says\n          Sam, a KKK member from North Carolina. \"On the one hand,\n          you look at him and think, 'Fuck, he's a fucking n—.' But on\n          the other hand, you see how he's getting rid of all those\n          DEI requirements at universities and workplaces, just like\n          we always said! Maybe it's true that some of them aren't\n          so bad after all.\"\n        </p>\n\n\n        <p>\n          One of the most interesting testimonies comes from Rodger,\n          a 19-year-old incel who spends his days watching videos of\n          Nick Fuentes and Andrew Tate. When we interviewed him at his\n          apartment, he had a Pepe the Frog poster hanging in front of\n          his bed, and on his desk, next to his computer and a roll of\n          toilet paper, sat a bust of Adolf Hitler. However, when the\n          subject turned to President Scott, that image seemed to\n          fall apart.\n        </p>\n\n\n        <p>\n          \"What can I say? The guy's doing a good job. He's punishing\n          all the foids, cracking down on abortion, telling them to\n          get married and have children. He's standing up to the\n          hypergamous dictatorship, and that takes balls.\" Then Rodger\n          stopped and gave a little smile. \"It's funny, because I always\n          thought they were the ones turning our women into whores...\"\n          When he saw we weren’t laughing, he became nervous.\n        </p>\n\n\n        <p>\n          For several minutes, Rodger did not continue the interview.\n          When we left, he looked as though he was about to cry.\n          The clash between his racist beliefs and the reality that\n          a Black man could share his rejection of matriarchy seemed\n          too much for him to bear.\n        </p>\n\n\n        <p>\n          Testimonies like these are proof of how radically American\n          society is changing with the arrival of its second Black\n          president, and offer a glimpse into how race relations may\n          evolve under Tim Scott's presidency. Next week, we'll discuss\n          the opposite phenomenon: Liberal women who oppose President\n          Scott, \"but not because he's Black or anything.\"\n        </p>\n      </div>\n\n\n      <div class=\"tags\">\n        <a href=\"#\">Politics</a>\n        <a href=\"#\">Tim Scott</a>\n        <a href=\"#\">Satire</a>\n      </div>\n    </article>\n\n\n    <aside class=\"sidebar\">\n      <h2>Explore The Bee</h2>\n      <a class=\"sidebar-link\" href=\"#\">Latest</a>\n      <a class=\"sidebar-link\" href=\"#\">Trending</a>\n      <a class=\"sidebar-link\" href=\"#\">Politics</a>\n      <a class=\"sidebar-link\" href=\"#\">Life</a>\n      <a class=\"sidebar-link\" href=\"#\">Videos</a>\n\n\n      <div class=\"newsletter\">\n        <h3>Stay in the loop</h3>\n        <p>Get the latest satire delivered to your inbox.</p>\n        <a href=\"#\">Sign up</a>\n      </div>\n    </aside>\n  </div>\n</main>\n\n\n<footer>\n  <div class=\"footer-inner\">\n    <nav class=\"footer-links\">\n      <a href=\"#\">About</a>\n      <a href=\"#\">Contact</a>\n      <a href=\"#\">Privacy Policy</a>\n      <a href=\"#\">Terms of Use</a>\n    </nav>\n\n\n    <p class=\"fiction-note\">\n    </p>\n  </div>\n</footer>\n\n\n</body>\n</html>","format":"html","sourceLines":[16128,16704]},
+    {"id":34,"label":"I like him, but not because I’m not racist or anything (President Scott)","image":"https://i.imgur.com/zN9ZnF9.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>Racist Support President Scott, \"But Not Because I'm Not Racist or Anything\" | The Babylon Bee</title>\n\n\n<style>\n* { box-sizing: border-box; }\n\n\nbody {\n  margin: 0;\n  color: #202020;\n  background: #fff;\n  font-family: Arial, Helvetica, sans-serif;\n  -webkit-font-smoothing: antialiased;\n}\n\n\na {\n  color: inherit;\n  text-decoration: none;\n}\n\n\na:hover { text-decoration: underline; }\n\n\nheader {\n  border-bottom: 1px solid #ddd;\n}\n\n\n.header-inner {\n  max-width: 1230px;\n  min-height: 100px;\n  margin: auto;\n  padding: 20px 30px;\n  display: flex;\n  align-items: center;\n  gap: 38px;\n}\n\n\n.brand {\n  display: flex;\n  align-items: center;\n  gap: 11px;\n}\n\n\n.bee {\n  width: 41px;\n  height: 41px;\n  border-radius: 50%;\n  background: #f3bd37;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  font-size: 24px;\n}\n\n\n.brand-text {\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 28px;\n  font-weight: bold;\n  line-height: .95;\n  letter-spacing: -1px;\n}\n\n\n.brand-text small {\n  display: block;\n  margin-bottom: 4px;\n  font-family: Arial, Helvetica, sans-serif;\n  font-size: 10px;\n  letter-spacing: 3px;\n}\n\n\n.header-nav {\n  display: flex;\n  gap: 25px;\n  align-items: center;\n  margin-left: auto;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.join {\n  background: #efb72f;\n  color: #171717;\n  padding: 11px 20px;\n  border-radius: 4px;\n}\n\n\n.secondary-nav {\n  background: #fafafa;\n  border-bottom: 1px solid #e5e5e5;\n}\n\n\n.secondary-inner {\n  max-width: 1170px;\n  margin: auto;\n  padding: 12px 30px;\n  display: flex;\n  gap: 27px;\n  font-size: 12px;\n  font-weight: bold;\n  color: #555;\n}\n\n\n.page {\n  max-width: 1170px;\n  margin: 42px auto 0;\n  padding: 0 30px;\n}\n\n\nh1 {\n  max-width: 1050px;\n  margin: 0 0 24px;\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: clamp(34px, 4vw, 49px);\n  line-height: 1.13;\n  font-weight: bold;\n  letter-spacing: -1.3px;\n}\n\n\n.metadata {\n  display: flex;\n  flex-wrap: wrap;\n  align-items: center;\n  gap: 10px;\n  color: #888;\n  font-size: 12px;\n  line-height: 1.7;\n}\n\n\n.metadata .category {\n  color: #bd8420;\n  font-weight: bold;\n}\n\n\n.dot { color: #aaa; }\n\n\n.layout {\n  display: grid;\n  grid-template-columns: minmax(0, 750px) minmax(210px, 1fr);\n  gap: 55px;\n  margin-top: 27px;\n}\n\n\n.share {\n  display: flex;\n  gap: 10px;\n  padding: 15px 0;\n  border-top: 1px solid #e2e2e2;\n  border-bottom: 1px solid #e2e2e2;\n  margin-bottom: 26px;\n}\n\n\n.share a {\n  display: inline-flex;\n  width: 32px;\n  height: 32px;\n  align-items: center;\n  justify-content: center;\n  border: 1px solid #ddd;\n  border-radius: 50%;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.article-body {\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 19px;\n  line-height: 1.8;\n}\n\n\n.article-body p {\n  margin: 0 0 26px;\n}\n\n\n.sidebar {\n  padding-top: 0;\n}\n\n\n.sidebar h2 {\n  margin: 0 0 10px;\n  padding: 19px 0;\n  border-top: 3px solid #efb72f;\n  border-bottom: 1px solid #ddd;\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 23px;\n}\n\n\n.sidebar-link {\n  display: block;\n  padding: 17px 0;\n  border-bottom: 1px solid #e3e3e3;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.newsletter {\n  margin-top: 30px;\n  padding: 23px;\n  background: #faf5e9;\n  border: 1px solid #e9dfc7;\n}\n\n\n.newsletter h3 {\n  margin: 0 0 12px;\n  font-family: Georgia, \"Times New Roman\", serif;\n  font-size: 24px;\n}\n\n\n.newsletter p {\n  margin: 0;\n  color: #777;\n  font-size: 13px;\n  line-height: 1.7;\n}\n\n\n.newsletter a {\n  display: block;\n  margin-top: 19px;\n  padding: 11px;\n  background: #efb72f;\n  border-radius: 3px;\n  color: #222;\n  text-align: center;\n  font-size: 12px;\n  font-weight: bold;\n}\n\n\n.tags {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 9px;\n  margin-top: 35px;\n  padding-top: 20px;\n  border-top: 1px solid #ddd;\n}\n\n\n.tags a {\n  padding: 5px 10px;\n  border: 1px solid #ddd;\n  color: #777;\n  font-size: 11px;\n}\n\n\nfooter {\n  margin-top: 65px;\n  padding: 30px;\n  background: #f7f7f7;\n  border-top: 1px solid #ddd;\n}\n\n\n.footer-inner {\n  max-width: 1110px;\n  margin: auto;\n}\n\n\n.footer-links {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 14px 24px;\n  color: #777;\n  font-size: 12px;\n}\n\n\n.fiction-note {\n  margin-top: 23px;\n  color: #999;\n  font-size: 11px;\n  line-height: 1.7;\n}\n\n\n@media (max-width: 1000px) {\n  .header-inner { gap: 22px; }\n  .header-nav { gap: 18px; }\n  .header-nav .optional { display: none; }\n  .layout { gap: 30px; }\n}\n\n\n@media (max-width: 800px) {\n  .layout { grid-template-columns: 1fr; }\n  .sidebar { display: none; }\n  .header-nav .medium-hide { display: none; }\n  .page { margin-top: 30px; }\n\n\n  .secondary-inner {\n    overflow-x: auto;\n    white-space: nowrap;\n  }\n}\n\n\n@media (max-width: 550px) {\n  .header-inner {\n    min-height: 85px;\n    padding: 17px 20px;\n  }\n\n\n  .brand-text { font-size: 24px; }\n  .bee { width: 34px; height: 34px; font-size: 20px; }\n  .header-nav a:not(.join) { display: none; }\n  .join { padding: 10px 14px; }\n  .secondary-inner { padding: 12px 20px; gap: 22px; }\n  .page { padding: 0 20px; }\n\n\n  h1 {\n    font-size: 35px;\n    letter-spacing: -.8px;\n  }\n\n\n  .article-body {\n    font-size: 18px;\n    line-height: 1.75;\n  }\n}\n\n\n@media print {\n  .header-nav,\n  .secondary-nav,\n  .share,\n  .sidebar,\n  .footer-links {\n    display: none;\n  }\n\n\n  .layout { display: block; }\n  h1 { font-size: 33px; }\n  .article-body { font-size: 12pt; }\n  .article-body p { orphans: 3; widows: 3; }\n}\n</style>\n</head>\n\n\n<body>\n\n\n<header>\n  <div class=\"header-inner\">\n    <a class=\"brand\" href=\"#\" aria-label=\"The Babylon Bee home\">\n      <span class=\"bee\" aria-hidden=\"true\">🐝</span>\n      <span class=\"brand-text\">\n        <small>THE</small>\n        Babylon Bee\n      </span>\n    </a>\n\n\n    <nav class=\"header-nav\">\n      <a href=\"#\">News</a>\n      <a href=\"#\">Videos</a>\n      <a class=\"medium-hide\" href=\"#\">Shop</a>\n      <a class=\"optional\" href=\"#\">Newsletter</a>\n      <a class=\"optional\" href=\"#\">More</a>\n      <a class=\"join\" href=\"#\">Join</a>\n      <a href=\"#\">Login</a>\n    </nav>\n  </div>\n</header>\n\n\n<div class=\"secondary-nav\">\n  <nav class=\"secondary-inner\">\n    <a href=\"#\">Latest</a>\n    <a href=\"#\">Trending</a>\n    <a href=\"#\">Categories</a>\n    <a href=\"#\">Video</a>\n    <a href=\"#\">Podcast</a>\n    <a href=\"#\">Newsletter</a>\n  </nav>\n</div>\n\n\n<main class=\"page\">\n  <h1>Racist Support President Scott, \"But Not Because I'm Not Racist or Anything\"</h1>\n\n\n  <div class=\"metadata\">\n    <a class=\"category\" href=\"#\">Politics</a>\n    <span class=\"dot\">·</span>\n    <time datetime=\"2026-06-25\">June 25, 2026</time>\n    <span class=\"dot\">·</span>\n    <span>The Babylon Bee</span>\n  </div>\n\n\n  <div class=\"layout\">\n    <article>\n      <nav class=\"share\" aria-label=\"Share article\">\n        <a href=\"#\" aria-label=\"Share on Facebook\">f</a>\n        <a href=\"#\" aria-label=\"Share on X\">𝕏</a>\n        <a href=\"#\" aria-label=\"Share by email\">✉</a>\n      </nav>\n\n\n      <div class=\"article-body\">\n        <p>\n          \"Good morning. Allow me to introduce myself. My name is Tim\n          McDaniel, and I'm a far-right racist. I was born in Chicago,\n          Illinois, just like my beloved Nick Fuentes, and for as long as\n          I can remember, I've known that I hate Blacks, Jews, Hispanics,\n          and anyone who doesn't belong to the pure Aryan race. I've\n          always considered myself this way, and I've never had any\n          reason to change. Every time a Black woman cut in front of\n          me in line at the supermarket, or I had to spend half an hour\n          talking to some Latino call center assistant just to get him\n          to understand what I was saying, my prejudices only grew\n          stronger and more deeply entrenched.\n        </p>\n\n\n        <p>\n          \"But lately, I don't know, I've been feeling different. This\n          new president we've got, Tim Scott (pause)... I like him.\n          I think he's doing a good job. It's very hard to come to\n          terms with, because, of course, he's Black, but the truth is,\n          he's actually doing everything I always wanted a white leader\n          to do! I have to say, as hard as it is for me to admit, I'm\n          a racist, but I like Tim Scott.\"\n        </p>\n\n\n        <p>\n          In recent months, many people like Tim have found themselves\n          in the same situation. Ordinary Americans, people like your\n          neighbor or your friend, are having serious trouble reconciling\n          their support for the current president with the fact that he\n          is a descendant of African tribes. This phenomenon is affecting\n          more and more Americans, and some psychologists have even\n          dared to call it one of the greatest crises facing our modern\n          society, second only to seeing the new gas prices.\n        </p>\n\n\n        <p>\n          \"It's very strange. It's a really fucked-up process,\" says\n          Sam, a KKK member from North Carolina. \"On the one hand,\n          you look at him and think, 'Fuck, he's a fucking...' But on\n          the other hand, you see how he's getting rid of all those\n          DEI requirements at universities and workplaces, just like\n          we always said! Maybe it's true that some of them aren't\n          so bad after all.\"\n        </p>\n\n\n        <p>\n          One of the most interesting testimonies comes from Rodger,\n          a 19-year-old incel who spends his days watching videos of\n          Nick Fuentes and Andrew Tate. When we interviewed him at his\n          apartment, he had a Pepe the Frog poster hanging in front of\n          his bed, and on his desk, next to his computer and a roll of\n          toilet paper, sat a bust of Adolf Hitler. However, when the\n          subject turned to President Scott, that image seemed to\n          fall apart.\n        </p>\n\n\n        <p>\n          \"What can I say? The guy's doing a good job. He's punishing\n          all the foids, cracking down on abortion, telling them to\n          get married and have children. He's standing up to the\n          hypergamous dictatorship, and that takes balls.\" Then Rodger\n          stopped and gave a little smile. \"It's funny, because I always\n          thought they were the ones turning our women into whores...\"\n          When he saw we weren’t laughing, he became nervous.\n        </p>\n\n\n        <p>\n          For several minutes, Rodger did not continue the interview.\n          When we left, he looked as though he was about to cry.\n          The clash between his racist beliefs and the reality that\n          a Black man could share his rejection of matriarchy seemed\n          too much for him to bear.\n        </p>\n\n\n        <p>\n          Testimonies like these are proof of how radically American\n          society is changing with the arrival of its second Black\n          president, and offer a glimpse into how race relations may\n          evolve under Tim Scott's presidency. Next week, we'll discuss\n          the opposite phenomenon: Liberal women who oppose President\n          Scott, \"but not because he's Black or anything.\"\n        </p>\n      </div>\n\n\n      <div class=\"tags\">\n        <a href=\"#\">Politics</a>\n        <a href=\"#\">Tim Scott</a>\n        <a href=\"#\">Satire</a>\n      </div>\n    </article>\n\n\n    <aside class=\"sidebar\">\n      <h2>Explore The Bee</h2>\n      <a class=\"sidebar-link\" href=\"#\">Latest</a>\n      <a class=\"sidebar-link\" href=\"#\">Trending</a>\n      <a class=\"sidebar-link\" href=\"#\">Politics</a>\n      <a class=\"sidebar-link\" href=\"#\">Life</a>\n      <a class=\"sidebar-link\" href=\"#\">Videos</a>\n\n\n      <div class=\"newsletter\">\n        <h3>Stay in the loop</h3>\n        <p>Get the latest satire delivered to your inbox.</p>\n        <a href=\"#\">Sign up</a>\n      </div>\n    </aside>\n  </div>\n</main>\n\n\n<footer>\n  <div class=\"footer-inner\">\n    <nav class=\"footer-links\">\n      <a href=\"#\">About</a>\n      <a href=\"#\">Contact</a>\n      <a href=\"#\">Privacy Policy</a>\n      <a href=\"#\">Terms of Use</a>\n    </nav>\n\n\n    <p class=\"fiction-note\">\n    </p>\n  </div>\n</footer>\n\n\n</body>\n</html>","format":"html","sourceLines":[16128,16704]},
     {"id":35,"label":"Cruz’s travel to Europe (>=350 EV)","image":"https://i.imgur.com/XFS40mc.jpeg","html":"<style>\n@font-face {\n    font-family: \"Heir Majrit\";\n    src: url(\"https://static.elpais.com/dist/resources/fonts/majrit/majrit-text/Majrit-Text-Roman.woff2\") format(\"woff2\");\n    font-style: normal;\n    font-weight: 400;\n    font-display: swap;\n}\n\n\n@font-face {\n    font-family: \"Heir Majrit\";\n    src: url(\"https://static.elpais.com/dist/resources/fonts/majrit/majrit-text/Majrit-Text-Bold.woff2\") format(\"woff2\");\n    font-style: normal;\n    font-weight: 700;\n    font-display: swap;\n}\n\n\n@font-face {\n    font-family: \"Heir Marcin\";\n    src: url(\"https://static.elpais.com/dist/resources/fonts/marcin-ant-b/marcinantb-regular-webfont.woff2\") format(\"woff2\");\n    font-style: normal;\n    font-weight: 400;\n    font-display: swap;\n}\n\n\n#heir-elpais,\n#heir-elpais * {\n    box-sizing: border-box;\n}\n\n\n#heir-elpais {\n    width: 100%;\n    background: #ffffff;\n    color: #111111;\n    font-family: \"Heir Majrit\", Georgia, serif;\n    font-size: 18px;\n    line-height: 1.5;\n    letter-spacing: 0;\n    text-align: left;\n    overflow-wrap: break-word;\n}\n\n\n#heir-elpais a {\n    color: inherit;\n    text-decoration: none;\n}\n\n\n#heir-elpais a:hover {\n    text-decoration: underline;\n}\n\n\n#heir-elpais a:focus-visible {\n    outline: 2px solid #016ca2;\n    outline-offset: 4px;\n}\n\n\n#heir-elpais .ep-masthead {\n    max-width: 1200px;\n    margin: 0 auto;\n    padding: 28px 24px 0;\n    text-align: center;\n}\n\n\n#heir-elpais .ep-logo {\n    display: block;\n    width: 300px;\n    max-width: 100%;\n    height: 76px;\n    object-fit: contain;\n    margin: 0 auto;\n}\n\n\n#heir-elpais .ep-edition {\n    margin: 8px 0 22px;\n    font-family: \"Heir Marcin\", Arial, sans-serif;\n    font-size: 11px;\n    line-height: 1.4;\n    text-transform: uppercase;\n}\n\n\n#heir-elpais .ep-nav {\n    display: flex;\n    justify-content: center;\n    flex-wrap: wrap;\n    gap: 10px 22px;\n    padding: 12px 0;\n    border-top: 1px solid #111111;\n    border-bottom: 1px solid #d8d8d8;\n    font-family: \"Heir Marcin\", Arial, sans-serif;\n    font-size: 12px;\n    line-height: 1.5;\n}\n\n\n#heir-elpais .ep-nav-current {\n    color: #016ca2;\n}\n\n\n#heir-elpais .ep-article {\n    max-width: 1000px;\n    margin: 0 auto;\n    padding: 42px 24px 48px;\n}\n\n\n#heir-elpais .ep-category {\n    display: flex;\n    align-items: center;\n    gap: 12px;\n    margin: 0 0 22px;\n    color: #016ca2;\n    font-family: \"Heir Marcin\", Arial, sans-serif;\n    font-size: 13px;\n    line-height: 1.3;\n    text-transform: uppercase;\n}\n\n\n#heir-elpais .ep-category::after {\n    content: \"\";\n    height: 1px;\n    flex: 1;\n    background: #d8d8d8;\n}\n\n\n#heir-elpais h1 {\n    margin: 0;\n    color: #111111;\n    font-family: \"Heir Majrit\", Georgia, serif;\n    font-size: 54px;\n    font-weight: 700;\n    line-height: 1.08;\n    letter-spacing: 0;\n    text-wrap: pretty;\n}\n\n\n#heir-elpais .ep-byline {\n    max-width: 680px;\n    margin: 30px auto 0;\n    padding: 18px 0;\n    border-top: 1px solid #111111;\n    border-bottom: 1px solid #e5e5e5;\n    font-family: \"Heir Marcin\", Arial, sans-serif;\n}\n\n\n#heir-elpais .ep-author {\n    margin: 0 0 5px;\n    font-size: 13px;\n    line-height: 1.4;\n    text-transform: uppercase;\n}\n\n\n#heir-elpais .ep-date {\n    margin: 0;\n    color: #666666;\n    font-size: 12px;\n    line-height: 1.5;\n}\n\n\n#heir-elpais .ep-body {\n    max-width: 680px;\n    margin: 26px auto 0;\n    font-family: \"Heir Majrit\", Georgia, serif;\n    font-size: 20px;\n    line-height: 1.55;\n}\n\n\n#heir-elpais .ep-body p {\n    margin: 0 0 26px;\n}\n\n\n#heir-elpais .ep-body i {\n    font-style: italic;\n}\n\n\n#heir-elpais .ep-footer {\n    max-width: 680px;\n    margin: 34px auto 0;\n    padding-top: 14px;\n    border-top: 1px solid #d8d8d8;\n    color: #777777;\n    font-family: \"Heir Marcin\", Arial, sans-serif;\n    font-size: 11px;\n    line-height: 1.5;\n}\n\n\n@media (max-width: 760px) {\n    #heir-elpais .ep-article {\n        padding-top: 30px;\n    }\n\n\n    #heir-elpais h1 {\n        font-size: 42px;\n    }\n}\n\n\n@media (max-width: 480px) {\n    #heir-elpais .ep-masthead {\n        padding: 20px 16px 0;\n    }\n\n\n    #heir-elpais .ep-logo {\n        width: 240px;\n        height: 62px;\n    }\n\n\n    #heir-elpais .ep-nav {\n        gap: 8px 14px;\n        font-size: 11px;\n    }\n\n\n    #heir-elpais .ep-article {\n        padding: 26px 16px 32px;\n    }\n\n\n    #heir-elpais h1 {\n        font-size: 36px;\n    }\n\n\n    #heir-elpais .ep-body {\n        font-size: 18px;\n        line-height: 1.55;\n    }\n}\n</style>\n\n\n<div id=\"heir-elpais\" lang=\"en\">\n    <header class=\"ep-masthead\">\n        <a href=\"https://english.elpais.com/\" aria-label=\"EL PAÍS English home\">\n            <img\n                class=\"ep-logo\"\n                src=\"https://images.english.elpais.com/resizer/hUw8qCVH2SupK_2guH_akZ0dM6w=/arc-anglerfish-eu-central-1-prod-prisa/public/PJEA4KS77JDC7NIDWSUGQSLB4Q.png\"\n                alt=\"EL PAÍS\"\n                width=\"300\"\n                height=\"76\"\n            >\n        </a>\n\n\n        <p class=\"ep-edition\">English edition</p>\n\n\n        <nav class=\"ep-nav\" aria-label=\"Sections\">\n            <a href=\"https://english.elpais.com/\">Home</a>\n            <a class=\"ep-nav-current\" href=\"https://english.elpais.com/international/\">International</a>\n            <a href=\"https://english.elpais.com/usa/\">U.S.</a>\n            <a href=\"https://english.elpais.com/spain/\">Spain</a>\n            <a href=\"https://english.elpais.com/economy-and-business/\">Economy and business</a>\n            <a href=\"https://english.elpais.com/culture/\">Culture</a>\n        </nav>\n    </header>\n\n\n    <article class=\"ep-article\" aria-labelledby=\"ep-cruz-title\">\n        <header>\n            <p class=\"ep-category\">International</p>\n            <h1 id=\"ep-cruz-title\">Cruz's strategy for Europe</h1>\n\n\n            <div class=\"ep-byline\">\n                <p class=\"ep-author\">Claudi Perez</p>\n                <p class=\"ep-date\">\n                    Madrid —\n                    <time datetime=\"2026-03-28\">March 28, 2026</time>\n                </p>\n            </div>\n        </header>\n\n\n        <div class=\"ep-body\">\n            <p>President Ted Cruz arrived at the Madrid Economic Forum with the message he’s carried out for his entire political career: freedom, christianity, and American exceptionalism the left had become too comfortable with power, and the West needed to recover the confidence to defend itself. Cruz returned, as he often does, to the story of his aunt Julia and the repression his family experienced under Fidel Castro, presenting Cuba as the lesson that shaped his understanding of socialism and left-wing leaders. However, the audience he reached out to didn't need to be convinced. The forum brought together some of the most recognisable figures of the international right: Argentina’s President Javier Milei; Iván Espinosa de los Monteros, leader of the Spanish far-right party <i>Vox</i>; Giorgia Meloni, recently elected prime minister of Italy; Reform UK leader Nigel Farage; Chile’s newly elected president, José Antonio Kast; and Flávio Bolsonaro, preparing his campaign for Brazil’s next presidential election. After eight years of Donald Trump, Cruz was presenting the world with a new attempt to organise a coherent right-wing Internationale.</p>\n\n\n            <p>Just as revealing was who had not been invited. Marine Le Pen was absent, as were Alice Weidel of Alternative for Germany, Hungarian Prime Minister Viktor Orbán, leaders of Poland’s harder nationalist right and Matteo Salvini in Italy. Their exclusion quickly became one of the main talking points surrounding the conference. On X, some conservative accounts joked about the fact, but others were more aggressive. Members of National Rally accused the Forum of playing “cancel culture”, while TV show host Tucker Carlson said that Cruz’s reception of Orbán showed that the President is “another member of the globalist, cosmopolitan elite”, a clear antisemitic dog-whistle to his extreme audience.</p>\n\n\n            <p>The guest list reflected an increasingly clear strategy inside the Cruz administration. Washington is prepared to cultivate parties well to the right of Europe’s traditional centre-right, but only when they fit certain conditions. While hostility to Brussels or nativism are not red lines for the White House, economic populism and sympathy for Moscow seems to be so. Le Pen’s protectionism and his semi-leftist economic agenda have always sat uneasily with Cruz’s free-market instincts. The AfD’s pro-Russian currents and hostility toward continued support for Ukraine make it an unreliable partner for an administration that has made the defence of Europe against Russia one of its foreign-policy priorities. Cruz appears to want an international right that resembles the Republican coalition of his beloved Ronald Reagan: socially conservative and anti-left, but also Atlanticist and <i>laissez-faire</i>.</p>\n\n\n            <p>Elon Musk’s absence was harder to ignore. The billionaire supported Cruz’s 2024 campaign and retains significant influence on the American right, but relations with the White House have cooled. Musk has repeatedly argued that Ukraine should seek a negotiated settlement with Russia, something Cruz’s advisors regard as “Chamberlain-esque”. His extensive business interests in China and his contacts with officials linked to the Chinese Communist Party have created further distrust. Senator Tom Cotton, who has Cruz’s ear, has publicly urged the president to distance himself from Musk. Cruz may have been listening.</p>\n        </div>\n\n\n        <footer class=\"ep-footer\">\n        </footer>\n    </article>\n</div>","format":"html","sourceLines":[17373,17688]},
     {"id":36,"label":"Bulletin of Atomic Scientists rise doomsday clock to 85 seconds amid tensions in Korea (Win & South Korean War)","image":"https://i.imgur.com/jpOJpNV.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>'Doomsday Clock' set at 65 seconds to midnight | Euronews</title>\n\n\n<style>\n* { box-sizing: border-box; }\n\n\n:root {\n  --blue: #003b70;\n  --ink: #202020;\n  --muted: #707070;\n  --line: #dedede;\n}\n\n\nbody {\n  margin: 0;\n  background: #fff;\n  color: var(--ink);\n  font-family: Arial, Helvetica, sans-serif;\n  -webkit-font-smoothing: antialiased;\n}\n\n\na {\n  color: inherit;\n  text-decoration: none;\n}\n\n\na:hover { text-decoration: underline; }\n\n\n.language-bar {\n  border-bottom: 1px solid #e8e8e8;\n  color: #666;\n  font-size: 11px;\n}\n\n\n.language-inner {\n  max-width: 1280px;\n  margin: auto;\n  padding: 9px 30px;\n  display: flex;\n  justify-content: flex-end;\n}\n\n\n.site-header {\n  border-bottom: 1px solid var(--line);\n}\n\n\n.header-inner {\n  max-width: 1280px;\n  min-height: 91px;\n  margin: auto;\n  padding: 20px 30px;\n  display: flex;\n  align-items: center;\n  gap: 36px;\n}\n\n\n.logo {\n  display: inline-flex;\n  align-items: center;\n  gap: 4px;\n  color: var(--blue);\n  font-size: 38px;\n  font-weight: bold;\n  letter-spacing: -2px;\n  line-height: 1;\n}\n\n\n.logo::after {\n  content: \"\";\n  width: 18px;\n  height: 18px;\n  margin: 12px 0 0 3px;\n  border-radius: 50%;\n  background: var(--blue);\n}\n\n\n.main-nav {\n  display: flex;\n  gap: 24px;\n  align-items: center;\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.header-actions {\n  margin-left: auto;\n  display: flex;\n  align-items: center;\n  gap: 20px;\n}\n\n\n.live {\n  display: inline-flex;\n  align-items: center;\n  gap: 7px;\n  color: var(--blue);\n  font-size: 12px;\n  font-weight: bold;\n}\n\n\n.live-dot {\n  width: 8px;\n  height: 8px;\n  border-radius: 50%;\n  background: #d72828;\n}\n\n\n.menu {\n  border: 0;\n  background: none;\n  color: var(--blue);\n  font-size: 25px;\n  cursor: pointer;\n}\n\n\n.trending {\n  background: #f6f7f8;\n  border-bottom: 1px solid #e4e4e4;\n}\n\n\n.trending-inner {\n  max-width: 1280px;\n  margin: auto;\n  padding: 12px 30px;\n  display: flex;\n  align-items: center;\n  gap: 24px;\n  font-size: 12px;\n  color: #555;\n}\n\n\n.trending-label {\n  color: var(--blue);\n  font-weight: bold;\n  padding-right: 22px;\n  border-right: 1px solid #ccc;\n}\n\n\n.page {\n  max-width: 1180px;\n  margin: 35px auto 0;\n  padding: 0 30px;\n}\n\n\n.breadcrumb {\n  margin-bottom: 21px;\n  color: #777;\n  font-size: 12px;\n}\n\n\n.breadcrumb span {\n  margin: 0 8px;\n  color: #aaa;\n}\n\n\n.category {\n  display: inline-block;\n  color: var(--blue);\n  font-size: 13px;\n  font-weight: bold;\n  margin-bottom: 14px;\n}\n\n\nh1 {\n  max-width: 1040px;\n  margin: 0 0 26px;\n  color: #171717;\n  font-size: clamp(35px, 4.4vw, 55px);\n  line-height: 1.1;\n  font-weight: 800;\n  letter-spacing: -1.7px;\n}\n\n\n.metadata {\n  border-top: 1px solid var(--line);\n  border-bottom: 1px solid var(--line);\n  padding: 16px 0;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  flex-wrap: wrap;\n  gap: 15px;\n}\n\n\n.byline {\n  font-size: 13px;\n  color: #666;\n  line-height: 1.8;\n}\n\n\n.byline strong { color: var(--blue); }\n\n\n.date {\n  display: block;\n  color: #888;\n  font-size: 12px;\n}\n\n\n.share {\n  display: flex;\n  align-items: center;\n  gap: 9px;\n}\n\n\n.share-label {\n  margin-right: 5px;\n  color: #777;\n  font-size: 12px;\n}\n\n\n.share a {\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  width: 32px;\n  height: 32px;\n  border: 1px solid #d8dce0;\n  border-radius: 50%;\n  color: var(--blue);\n  font-size: 14px;\n  font-weight: bold;\n}\n\n\n.article-layout {\n  display: grid;\n  grid-template-columns: minmax(0, 760px) minmax(210px, 1fr);\n  gap: 60px;\n  margin-top: 30px;\n}\n\n\n.article-body {\n  color: #333;\n  font-size: 19px;\n  line-height: 1.8;\n}\n\n\n.article-body p {\n  margin: 0 0 28px;\n}\n\n\n.sidebar {\n  padding-top: 5px;\n}\n\n\n.sidebar h2 {\n  margin: 0 0 9px;\n  padding-bottom: 13px;\n  border-bottom: 3px solid var(--blue);\n  color: var(--blue);\n  font-size: 19px;\n}\n\n\n.topic {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  gap: 12px;\n  padding: 17px 0;\n  border-bottom: 1px solid var(--line);\n  font-size: 14px;\n  font-weight: bold;\n  line-height: 1.5;\n}\n\n\n.topic span { color: #999; }\n\n\n.newsletter {\n  padding: 23px;\n  margin-top: 33px;\n  background: #f1f5f8;\n  border-top: 3px solid var(--blue);\n}\n\n\n.newsletter h3 {\n  margin: 0 0 13px;\n  color: var(--blue);\n  font-size: 23px;\n  line-height: 1.2;\n}\n\n\n.newsletter p {\n  color: #666;\n  font-size: 13px;\n  line-height: 1.7;\n}\n\n\n.newsletter a {\n  display: block;\n  background: var(--blue);\n  color: white;\n  margin-top: 18px;\n  padding: 11px;\n  text-align: center;\n  font-size: 12px;\n  font-weight: bold;\n}\n\n\n.tags {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 9px;\n  margin-top: 35px;\n  padding-top: 20px;\n  border-top: 1px solid var(--line);\n}\n\n\n.tags a {\n  padding: 5px 10px;\n  border: 1px solid #ddd;\n  color: var(--blue);\n  font-size: 11px;\n}\n\n\nfooter {\n  background: #00345e;\n  color: white;\n  margin-top: 65px;\n  padding: 32px 30px 40px;\n}\n\n\n.footer-inner {\n  max-width: 1120px;\n  margin: auto;\n}\n\n\n.footer-logo {\n  font-size: 30px;\n  font-weight: bold;\n  letter-spacing: -1.5px;\n  margin-bottom: 24px;\n}\n\n\n.footer-links {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 14px 25px;\n  color: #dde6ef;\n  font-size: 12px;\n}\n\n\n.fiction-note {\n  margin-top: 24px;\n  color: #aebfd0;\n  font-size: 11px;\n  line-height: 1.7;\n}\n\n\n@media (max-width: 1100px) {\n  .header-inner { gap: 25px; }\n  .main-nav { gap: 18px; font-size: 13px; }\n  .main-nav .optional { display: none; }\n  .article-layout { gap: 35px; }\n}\n\n\n@media (max-width: 850px) {\n  .main-nav .medium-hide { display: none; }\n  .article-layout { grid-template-columns: 1fr; }\n  .sidebar { display: none; }\n\n\n  .trending-inner {\n    overflow-x: auto;\n    white-space: nowrap;\n  }\n}\n\n\n@media (max-width: 550px) {\n  .header-inner {\n    min-height: 78px;\n    padding: 18px 20px;\n  }\n\n\n  .logo { font-size: 32px; }\n  .logo::after { width: 15px; height: 15px; }\n  .main-nav { display: none; }\n  .language-inner { padding: 8px 20px; }\n  .trending-inner { padding: 11px 20px; gap: 20px; }\n  .page { padding: 0 20px; margin-top: 25px; }\n\n\n  h1 {\n    font-size: 37px;\n    letter-spacing: -1px;\n  }\n\n\n  .article-body {\n    font-size: 18px;\n    line-height: 1.75;\n  }\n\n\n  .metadata { align-items: flex-start; }\n}\n\n\n@media print {\n  .language-bar,\n  .main-nav,\n  .header-actions,\n  .trending,\n  .share,\n  .sidebar,\n  .footer-links {\n    display: none;\n  }\n\n\n  .article-layout { display: block; }\n  h1 { font-size: 35px; }\n  .article-body { font-size: 12pt; }\n  .article-body p { orphans: 3; widows: 3; }\n  footer { background: white; }\n  .fiction-note { color: #777; }\n}\n</style>\n</head>\n\n\n<body>\n\n\n<div class=\"language-bar\">\n  <div class=\"language-inner\">English ▾</div>\n</div>\n\n\n<header class=\"site-header\">\n  <div class=\"header-inner\">\n    <a class=\"logo\" href=\"#\" aria-label=\"Euronews home\">euronews</a>\n\n\n    <nav class=\"main-nav\">\n      <a href=\"#\">EU News</a>\n      <a href=\"#\">Europe</a>\n      <a href=\"#\">World</a>\n      <a href=\"#\">Business</a>\n      <a class=\"medium-hide\" href=\"#\">Culture</a>\n      <a class=\"optional\" href=\"#\">Green</a>\n      <a class=\"optional\" href=\"#\">Travel</a>\n      <a class=\"optional\" href=\"#\">Next</a>\n    </nav>\n\n\n    <div class=\"header-actions\">\n      <a class=\"live\" href=\"#\"><span class=\"live-dot\"></span> Live</a>\n      <button class=\"menu\" type=\"button\" aria-label=\"Menu\">☰</button>\n    </div>\n  </div>\n</header>\n\n\n<div class=\"trending\">\n  <nav class=\"trending-inner\">\n    <span class=\"trending-label\">Trending</span>\n    <a href=\"#\">Korean War</a>\n    <a href=\"#\">United States</a>\n    <a href=\"#\">China</a>\n    <a href=\"#\">Climate Crisis</a>\n    <a href=\"#\">Artificial Intelligence</a>\n  </nav>\n</div>\n\n\n<main class=\"page\">\n  <div class=\"breadcrumb\">\n    <a href=\"#\">Home</a>\n    <span>›</span>\n    <a href=\"#\">World</a>\n  </div>\n\n\n  <a class=\"category\" href=\"#\">World</a>\n\n\n  <h1>'Doomsday Clock' set at 65 seconds to midnight</h1>\n\n\n  <div class=\"metadata\">\n    <div class=\"byline\">\n      <strong>Euronews</strong>\n      <time class=\"date\" datetime=\"2027-01-26\">\n        Published on 26 January 2027\n      </time>\n    </div>\n\n\n    <nav class=\"share\" aria-label=\"Share article\">\n      <span class=\"share-label\">Share</span>\n      <a href=\"#\" aria-label=\"Share on Facebook\">f</a>\n      <a href=\"#\" aria-label=\"Share on X\">𝕏</a>\n      <a href=\"#\" aria-label=\"Share by email\">✉</a>\n    </nav>\n  </div>\n\n\n  <div class=\"article-layout\">\n    <article class=\"article-body\">\n\n\n      <p>\n        For 80 years, the Bulletin of the Atomic Scientists has used the\n        Doomsday Clock to represent how close humanity stands to global\n        catastrophe, with midnight symbolising the end of civilisation.\n        The closer the clock moves to midnight, the greater the perceived\n        danger. On Monday, the Bulletin announced that the clock had been\n        moved to just 65 seconds to midnight, the closest it has ever been\n        since its creation in 1947. Scientists cited the worsening climate\n        crisis, the growing risks associated with artificial intelligence\n        and, above all, the ongoing Korean War as the main reasons behind\n        the decision.\n      </p>\n\n\n      <p>\n        Indeed, 2026 was a year of unprecedented international tensions,\n        particularly following North Korea's invasion of South Korea early\n        in the year, backed by China, and the immediate intervention of\n        the United States in defence of its ally. Although the conflict\n        has so far stopped short of a full-scale war between the two\n        superpowers, repeated confrontations between American and Chinese\n        naval forces in the South China Sea, alongside mutual threats of\n        nuclear war from President Ted Cruz and North Korean leader\n        Kim Jong Un, have raised fears of a wider conflict. The Bulletin\n        warned that the world was entering an increasingly dangerous\n        period in which a single miscalculation could have catastrophic\n        consequences.\n      </p>\n\n\n      <p>\n        World leaders have responded to the announcement in markedly\n        different ways. In Europe, Spanish Prime Minister Pedro Sánchez\n        and British Prime Minister Keir Starmer warned of the\n        \"unprecedented situation in which we find ourselves,\" calling\n        on Washington and Beijing to cease hostilities and pursue a\n        diplomatic resolution. The Chinese government declined to comment\n        on the announcement. Meanwhile, the White House dismissed the\n        Bulletin as an organisation promoting \"an agenda in the service\n        of woke globalism.\" The administration's press secretary also\n        insisted, for the third time this week, that the end of the\n        Korean War was imminent and that Kim Jong Un's regime had its\n        days numbered.\n      </p>\n\n\n      <div class=\"tags\">\n        <a href=\"#\">Doomsday Clock</a>\n        <a href=\"#\">Korean War</a>\n        <a href=\"#\">Nuclear Weapons</a>\n        <a href=\"#\">Climate Change</a>\n        <a href=\"#\">Artificial Intelligence</a>\n      </div>\n    </article>\n\n\n    <aside class=\"sidebar\">\n      <h2>Explore World</h2>\n      <a class=\"topic\" href=\"#\">World News <span>›</span></a>\n      <a class=\"topic\" href=\"#\">Asia <span>›</span></a>\n      <a class=\"topic\" href=\"#\">United States <span>›</span></a>\n      <a class=\"topic\" href=\"#\">Europe <span>›</span></a>\n      <a class=\"topic\" href=\"#\">Climate <span>›</span></a>\n\n\n      <div class=\"newsletter\">\n        <h3>Stay informed</h3>\n        <p>\n          Follow the latest news and developments from Europe\n          and around the world.\n        </p>\n        <a href=\"#\">Discover our newsletters</a>\n      </div>\n    </aside>\n  </div>\n</main>\n\n\n<footer>\n  <div class=\"footer-inner\">\n    <div class=\"footer-logo\">euronews</div>\n\n\n    <nav class=\"footer-links\">\n      <a href=\"#\">About Euronews</a>\n      <a href=\"#\">Contact</a>\n      <a href=\"#\">Terms and Conditions</a>\n      <a href=\"#\">Privacy Policy</a>\n      <a href=\"#\">Cookie Policy</a>\n      <a href=\"#\">Accessibility</a>\n    </nav>\n\n\n    <p class=\"fiction-note\">\n    </p>\n  </div>\n</footer>\n\n\n</body>\n</html>","format":"html","sourceLines":[16711,17368]},
     {"id":37,"label":"Michael Knowles attacks AOC for attacking Britt on IVF (Cruz/Britt)","image":"https://i.imgur.com/oel38R3.jpeg","html":"<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n\n\n    <title>\n        The Michael Knowles Show #2018 - AOC Wants to Be President\n    </title>\n\n\n    <style>\n        :root {\n            --black: #080808;\n            --paper: #ffffff;\n            --page: #f4f4f5;\n            --ink: #171717;\n            --muted: #71717a;\n            --border: #dedee3;\n            --purple: #7047eb;\n            --purple-dark: #5732c7;\n            --purple-soft: #eee9ff;\n            --yellow: #ffd84d;\n        }\n\n\n        * {\n            box-sizing: border-box;\n        }\n\n\n        html {\n            scroll-behavior: smooth;\n        }\n\n\n        body {\n            margin: 0;\n            color: var(--ink);\n            background: var(--page);\n            font-family: Arial, Helvetica, sans-serif;\n            line-height: 1.5;\n        }\n\n\n        a {\n            color: inherit;\n            text-decoration: none;\n        }\n\n\n        button,\n        input {\n            font: inherit;\n        }\n\n\n        .fiction-notice {\n            padding: 8px 20px;\n            color: #ffffff;\n            background: #343434;\n            text-align: center;\n            font-size: 12px;\n            font-weight: 700;\n        }\n\n\n        .site-header {\n            color: #ffffff;\n            background: var(--black);\n            border-bottom: 1px solid #252525;\n        }\n\n\n        .header-inner {\n            width: min(1180px, calc(100% - 36px));\n            min-height: 76px;\n            margin: 0 auto;\n            display: flex;\n            align-items: center;\n            gap: 34px;\n        }\n\n\n        .podscribe-logo {\n            width: 180px;\n            max-height: 47px;\n            display: block;\n            object-fit: contain;\n        }\n\n\n        .main-navigation {\n            display: flex;\n            gap: 24px;\n            color: #dddddd;\n            font-size: 14px;\n            font-weight: 700;\n        }\n\n\n        .header-actions {\n            margin-left: auto;\n            display: flex;\n            align-items: center;\n            gap: 13px;\n        }\n\n\n        .login-link {\n            font-size: 14px;\n            font-weight: 700;\n        }\n\n\n        .signup-link {\n            padding: 10px 16px;\n            color: #ffffff;\n            background: var(--purple);\n            border-radius: 5px;\n            font-size: 14px;\n            font-weight: 700;\n        }\n\n\n        .page {\n            width: min(1180px, calc(100% - 36px));\n            margin: 0 auto;\n            padding: 34px 0 80px;\n        }\n\n\n        .breadcrumbs {\n            margin-bottom: 24px;\n            color: var(--muted);\n            font-size: 13px;\n        }\n\n\n        .breadcrumbs span {\n            margin: 0 7px;\n            color: #a1a1aa;\n        }\n\n\n        .episode-layout {\n            display: grid;\n            grid-template-columns: minmax(0, 790px) 320px;\n            gap: 40px;\n            align-items: start;\n        }\n\n\n        .episode-main,\n        .sidebar-card {\n            background: var(--paper);\n            border: 1px solid var(--border);\n            border-radius: 7px;\n        }\n\n\n        .episode-header {\n            padding: 34px 38px 28px;\n            border-bottom: 1px solid var(--border);\n        }\n\n\n        .show-name {\n            margin-bottom: 11px;\n            color: var(--purple-dark);\n            font-size: 14px;\n            font-weight: 800;\n        }\n\n\n        .episode-header h1 {\n            margin: 0 0 18px;\n            font-size: clamp(31px, 4vw, 47px);\n            line-height: 1.08;\n            letter-spacing: 0;\n        }\n\n\n        .episode-description {\n            margin: 0 0 18px;\n            color: #52525b;\n            font-size: 17px;\n            line-height: 1.55;\n        }\n\n\n        .episode-meta {\n            display: flex;\n            flex-wrap: wrap;\n            gap: 9px 20px;\n            color: var(--muted);\n            font-size: 13px;\n        }\n\n\n        .episode-meta strong {\n            color: var(--ink);\n        }\n\n\n        .audio-player {\n            margin: 26px 38px 0;\n            padding: 17px;\n            display: flex;\n            align-items: center;\n            gap: 15px;\n            color: #ffffff;\n            background: var(--black);\n            border-radius: 6px;\n        }\n\n\n        .play-button {\n            width: 44px;\n            height: 44px;\n            flex: 0 0 44px;\n            padding: 0 0 0 4px;\n            color: var(--black);\n            background: #ffffff;\n            border: 0;\n            border-radius: 50%;\n            cursor: pointer;\n            font-size: 18px;\n        }\n\n\n        .player-information {\n            min-width: 0;\n            flex: 1;\n        }\n\n\n        .player-title {\n            display: block;\n            margin-bottom: 7px;\n            overflow: hidden;\n            text-overflow: ellipsis;\n            white-space: nowrap;\n            font-size: 13px;\n            font-weight: 700;\n        }\n\n\n        .player-track {\n            height: 4px;\n            overflow: hidden;\n            background: #444444;\n            border-radius: 2px;\n        }\n\n\n        .player-progress {\n            width: 31%;\n            height: 100%;\n            background: var(--purple);\n        }\n\n\n        .player-time {\n            color: #bdbdbd;\n            font-size: 12px;\n        }\n\n\n        .transcript-area {\n            padding: 32px 38px 45px;\n        }\n\n\n        .transcript-header {\n            display: flex;\n            align-items: flex-end;\n            justify-content: space-between;\n            gap: 20px;\n            margin-bottom: 22px;\n        }\n\n\n        .transcript-header h2 {\n            margin: 0;\n            font-size: 28px;\n        }\n\n\n        .transcript-header p {\n            margin: 4px 0 0;\n            color: var(--muted);\n            font-size: 13px;\n        }\n\n\n        .search-control {\n            width: 230px;\n            position: relative;\n        }\n\n\n        .search-control input {\n            width: 100%;\n            padding: 10px 13px;\n            background: #ffffff;\n            border: 1px solid #cfcfd5;\n            border-radius: 4px;\n        }\n\n\n        .transcript-entry {\n            display: grid;\n            grid-template-columns: 125px minmax(0, 1fr);\n            gap: 22px;\n            padding: 23px 0;\n            border-top: 1px solid var(--border);\n        }\n\n\n        .speaker {\n            color: var(--purple-dark);\n            font-size: 14px;\n            font-weight: 800;\n        }\n\n\n        .timestamp {\n            display: block;\n            margin-top: 4px;\n            color: var(--muted);\n            font-size: 12px;\n            font-weight: 400;\n        }\n\n\n        .spoken-text p {\n            margin: 0 0 16px;\n            font-size: 16px;\n            line-height: 1.68;\n        }\n\n\n        .spoken-text p:last-child {\n            margin-bottom: 0;\n        }\n\n\n        .stage-direction {\n            color: var(--muted);\n            font-style: italic;\n        }\n\n\n        mark {\n            color: inherit;\n            background: #fff0a8;\n        }\n\n\n        .locked-content {\n            margin-top: 25px;\n            padding: 38px 25px;\n            position: relative;\n            overflow: hidden;\n            background:\n                linear-gradient(\n                    to bottom,\n                    rgba(255, 255, 255, 0.15),\n                    #ffffff 65%\n                );\n            border-top: 1px solid var(--border);\n            text-align: center;\n        }\n\n\n        .lock-icon {\n            width: 43px;\n            height: 43px;\n            margin: 0 auto 13px;\n            display: grid;\n            place-items: center;\n            color: #ffffff;\n            background: var(--purple);\n            border-radius: 50%;\n            font-size: 20px;\n        }\n\n\n        .locked-content h3 {\n            margin: 0 0 8px;\n            font-size: 21px;\n        }\n\n\n        .locked-content p {\n            margin: 0 0 17px;\n            color: var(--muted);\n            font-size: 14px;\n        }\n\n\n        .locked-content a {\n            display: inline-block;\n            padding: 11px 19px;\n            color: #ffffff;\n            background: var(--purple);\n            border-radius: 4px;\n            font-size: 14px;\n            font-weight: 800;\n        }\n\n\n        .episode-sidebar {\n            position: sticky;\n            top: 18px;\n        }\n\n\n        .sidebar-card {\n            margin-bottom: 20px;\n            padding: 23px;\n        }\n\n\n.show-artwork {\n    width: 100%;\n    aspect-ratio: 1;\n    margin-bottom: 18px;\n    display: block;\n    object-fit: cover;\n    object-position: center;\n    background: #111111;\n    border-radius: 5px;\n}\n\n\n        .show-artwork strong {\n            max-width: 240px;\n            padding: 20px;\n            font-family: Georgia, \"Times New Roman\", serif;\n            font-size: 31px;\n            line-height: 1.05;\n        }\n\n\n        .sidebar-card h2 {\n            margin: 0 0 8px;\n            font-size: 21px;\n        }\n\n\n        .sidebar-card p {\n            margin: 0 0 15px;\n            color: var(--muted);\n            font-size: 14px;\n        }\n\n\n        .follow-button {\n            width: 100%;\n            padding: 11px;\n            color: #ffffff;\n            background: var(--purple);\n            border: 0;\n            border-radius: 4px;\n            font-weight: 800;\n            cursor: pointer;\n        }\n\n\n        .episode-information {\n            margin: 0;\n            padding: 0;\n            list-style: none;\n        }\n\n\n        .episode-information li {\n            padding: 11px 0;\n            border-bottom: 1px solid var(--border);\n            font-size: 14px;\n        }\n\n\n        .episode-information li:last-child {\n            border-bottom: 0;\n        }\n\n\n        .episode-information strong {\n            display: block;\n            margin-bottom: 2px;\n        }\n\n\n        .site-footer {\n            padding: 27px 20px;\n            color: #a1a1aa;\n            background: var(--black);\n            text-align: center;\n            font-size: 12px;\n        }\n\n\n        @media (max-width: 880px) {\n            .main-navigation {\n                display: none;\n            }\n\n\n            .episode-layout {\n                grid-template-columns: 1fr;\n            }\n\n\n            .episode-sidebar {\n                position: static;\n            }\n        }\n\n\n        @media (max-width: 600px) {\n            .header-inner,\n            .page {\n                width: min(100% - 20px, 1180px);\n            }\n\n\n            .podscribe-logo {\n                width: 145px;\n            }\n\n\n            .login-link {\n                display: none;\n            }\n\n\n            .episode-header,\n            .transcript-area {\n                padding-left: 20px;\n                padding-right: 20px;\n            }\n\n\n            .audio-player {\n                margin-left: 20px;\n                margin-right: 20px;\n            }\n\n\n            .transcript-header {\n                align-items: stretch;\n                flex-direction: column;\n            }\n\n\n            .search-control {\n                width: 100%;\n            }\n\n\n            .transcript-entry {\n                grid-template-columns: 1fr;\n                gap: 8px;\n            }\n        }\n    </style>\n</head>\n\n\n<body>\n    <!-- Cruz/Britt -->\n\n\n    <div class=\"fiction-notice\">\n    </div>\n\n\n    <header class=\"site-header\">\n        <div class=\"header-inner\">\n            <img\n                class=\"podscribe-logo\"\n                src=\"https://images.squarespace-cdn.com/content/v1/60fdad6fb704f7471c09aed5/dd9a292d-6f53-4ac4-86fd-10ddb446f598/podscribe+white+watermark.png\"\n                alt=\"Podscribe\"\n            >\n\n\n            <nav class=\"main-navigation\" aria-label=\"Main navigation\">\n                <a href=\"#\">Discover</a>\n                <a href=\"#\">Podcasts</a>\n                <a href=\"#\">Transcripts</a>\n                <a href=\"#\">About</a>\n            </nav>\n\n\n            <div class=\"header-actions\">\n                <a class=\"login-link\" href=\"#\">Log in</a>\n                <a class=\"signup-link\" href=\"#\">Sign up</a>\n            </div>\n        </div>\n    </header>\n\n\n    <main class=\"page\">\n        <div class=\"breadcrumbs\">\n            Podcasts\n            <span>›</span>\n            The Michael Knowles Show\n            <span>›</span>\n            Episode 2018\n        </div>\n\n\n        <div class=\"episode-layout\">\n            <article class=\"episode-main\">\n                <header class=\"episode-header\">\n                    <div class=\"show-name\">The Michael Knowles Show</div>\n\n\n                    <h1>\n                        #2018 - AOC Wants to Be President\n                    </h1>\n\n\n                    <p class=\"episode-description\">\n                        Congresswoman Alexandria Ocasio-Cortez tests the waters\n                        for a 2028 presidential run, the controversy surrounding\n                        Cracker Barrel continues, and global warming may\n                        apparently be over.\n                    </p>\n\n\n                    <div class=\"episode-meta\">\n                        <span><strong>Published:</strong> Jul 17, 2026</span>\n                        <span><strong>Host:</strong> Michael Knowles</span>\n                        <span><strong>Episode:</strong> 2018</span>\n                    </div>\n                </header>\n\n\n                <div class=\"audio-player\">\n                    <button class=\"play-button\" type=\"button\" aria-label=\"Play episode\">\n                        ▶\n                    </button>\n\n\n                    <div class=\"player-information\">\n                        <span class=\"player-title\">\n                            The Michael Knowles Show #2018\n                        </span>\n\n\n                        <div class=\"player-track\">\n                            <div class=\"player-progress\"></div>\n                        </div>\n                    </div>\n\n\n                    <span class=\"player-time\">45:47</span>\n                </div>\n\n\n                <section class=\"transcript-area\">\n                    <header class=\"transcript-header\">\n                        <div>\n                            <h2>Episode transcript</h2>\n                            <p>\n                                Click a timestamp to navigate through the episode.\n                            </p>\n                        </div>\n\n\n                        <div class=\"search-control\">\n                            <input\n                                id=\"transcript-search\"\n                                type=\"search\"\n                                placeholder=\"Search transcript\"\n                                aria-label=\"Search transcript\"\n                            >\n                        </div>\n                    </header>\n\n\n                    <div id=\"transcript\">\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">00:00</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    Congresswoman Alexandria Ocasio-Cortez is\n                                    reportedly testing the waters for a 2028\n                                    presidential run, so naturally she has\n                                    decided to issue a statement dehumanizing\n                                    little babies and comparing Christians to\n                                    Nazis.\n                                </p>\n\n\n                                <p>\n                                    The controversy over Cracker Barrel also\n                                    continues, as it should until they finally\n                                    change that horrible, horrible design. And\n                                    it seems that global warming is basically\n                                    over? I am Michael Knowles. This is The\n                                    Michael Knowles Show.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Production\n                                <span class=\"timestamp\">00:28</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p class=\"stage-direction\">[Intro music]</p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">00:51</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    Welcome back to the show. There is so much\n                                    to get to today: abortion, IVF, Christianity,\n                                    and our nation's heritage.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">01:05</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    But first, I want to tell you about Cardiff.\n                                    Go to Cardiff.co/knowles,\n                                    K-N-O-W-L-E-S.\n                                </p>\n\n\n                                <p>\n                                    There are some good problems to have in\n                                    business. A good problem is that people want\n                                    to buy more of your product. A good problem\n                                    is that they need more of your services in\n                                    more places at the same time. Those are good\n                                    problems, but they are expensive problems.\n                                    Cardiff helps business owners obtain the\n                                    capital to do something about them.\n                                </p>\n\n\n                                <p>\n                                    This is why business owners should know\n                                    about Cardiff. If you want bank-level rates\n                                    without bank-level delays, you have to\n                                    visit Cardiff.co/knowles. Cardiff can get\n                                    you up to $500,000 in funding, and one of\n                                    the best parts is that it takes less than\n                                    five minutes to apply.\n                                </p>\n\n\n                                <p>\n                                    There is no impact on your personal credit,\n                                    with the opportunity to receive funding that\n                                    very same day. This is not their first\n                                    rodeo. They have provided more than $12\n                                    billion to businesses since 2004.\n                                </p>\n\n\n                                <p>\n                                    If you have been in business for at least a\n                                    year and are bringing in $20,000 a month in\n                                    revenue, go to Cardiff.co/knowles,\n                                    K-N-O-W-L-E-S. That is\n                                    Cardiff.co/knowles. Real growth, fast\n                                    funding. Cardiff: borrow better.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">03:34</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    AOC. We have talked a lot about AOC, have\n                                    we not, folks?\n                                    <span data-rice-conditional></span>\n                                    AOC is preparing a run in 2028. It is\n                                    public knowledge.\n                                </p>\n\n\n                                <p>\n                                    One of the things she is doing to attract\n                                    attention during these very early primary\n                                    stages is clashing more frequently with the\n                                    Cruz administration. Obviously, she does\n                                    not like what Ted Cruz is doing, but she is\n                                    becoming much more vocal about it.\n                                </p>\n\n\n                                <p>\n                                    It is not just the sassy posts on X about\n                                    how \"this is a critical moment for our\n                                    democracy,\" or how \"the world will end in\n                                    10 years if we do not do something about\n                                    climate change,\" only for the world not to\n                                    end and for her to look like an idiot.\n                                </p>\n\n\n                                <p>\n                                    No, she is now publicly attacking the Cruz\n                                    administration at every turn, much as Gavin\n                                    Newsom did during the last election.\n                                    Remember Newsom's Twitter posts? It is the\n                                    same embarrassing, deviant, woke corporate\n                                    style of the liberals, only somehow worse\n                                    because she is AOC.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">05:23</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    There is a clip that has been trending on\n                                    social media. It concerns her position on\n                                    the IVF debate and her attacks against Vice\n                                    President Britt after Britt made what I\n                                    consider to be some pretty good statements\n                                    defending Alabama's restrictions on IVF\n                                    facilities.\n                                </p>\n\n\n                                <p>\n                                    As you know, I hold what some people\n                                    consider a controversial opinion on IVF.\n                                    It is not shared by many conservatives, but\n                                    it happens to be the correct opinion.\n                                </p>\n\n\n                                <p>\n                                    It is not even a particularly difficult\n                                    position to reach. It is simply the\n                                    conservative position once you affirm\n                                    Christian ethics surrounding human life\n                                    and tradition. But let us hear what AOC\n                                    has to say.\n                                </p>\n                            </div>\n                        </div>\n\n\n<div class=\"transcript-entry\">\n    <div class=\"speaker\">\n        Alexandria Ocasio-Cortez\n        <span class=\"timestamp\">06:42</span>\n    </div>\n\n\n    <div class=\"spoken-text\">\n        <p>\n            It's incredible that we have to say this, but for Christ's sake, an embryo stored in a\n            fertility clinic is not a baby sleeping in a crib. It cannot\n            think, feel pain, breathe, or survive independently. Treating\n            those two things as legally identical does not protect children.\n            It gives the State control over families.\n        </p>\n\n\n        <p>\n            Human dignity cannot be reduced\n            to whether a sperm has fertilized an egg. It must include the\n            living woman whose body, health, family, and future are being\n            placed under government control.\n        </p>\n\n\n        <p>\n            History has repeatedly shown us what happens when governments\n            declare that one religious doctrine defines citizenship, family,\n            morality, and acceptable private behavior. Hitler used the language of protecting children,\n            and traditional families, to strip multiple groups of people of their civil rights. And it's terrifying to see that's the way we're going in this country.\n        </p>\n    </div>\n</div>\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">09:18</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    She cannot even say it plainly. She is\n                                    effectively saying, \"A sperm fertilizes an\n                                    egg and generates, um, something, and these\n                                    crazy Republicans believe that something\n                                    deserves the right to life!\"\n                                </p>\n\n\n                                <p>\n                                    Of course embryos deserve the right to live.\n                                    Of course they do. That is what human beings\n                                    have recognized for essentially the entire\n                                    span of history. Most people, and all of\n                                    Western civilization, which is simply a\n                                    sophisticated way of saying Christianity,\n                                    have defended the principle that all human\n                                    life possesses value, regardless of its\n                                    stage of development.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">10:43</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    You cannot separate these things. You cannot\n                                    say, \"I support human life, but only six\n                                    months after it is created. No, actually\n                                    five months. No, four. Seven! Six, seven!\"\n                                    Forgive me for that joke, but you cannot do\n                                    it. Either you defend life or you do not.\n                                </p>\n\n\n                                <p>\n                                    I do not want to give AOC credit for this,\n                                    but at least she is consistent with her\n                                    ideology. It is a terrible ideology, an\n                                    ideology that legalizes child murder, but\n                                    she is consistent.\n                                </p>\n\n\n                                <p>\n                                    She supports dismembering babies in the\n                                    womb, just as she supports freezing them\n                                    when they are embryos, discarding them, and\n                                    treating human beings like machines or\n                                    tools.\n                                </p>\n\n\n                                <p>\n                                    She does not believe that every human being\n                                    possesses a right to life endowed by the\n                                    Creator. She does not believe in a Creator\n                                    because she is a communist. That is very\n                                    clear. It is clearer than whatever the\n                                    squishy conservatives are doing when they\n                                    attack the administration and the vice\n                                    president over this issue.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">12:38</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    \"But Michael, why are you focusing on this?\n                                    Do we not have other issues, such as the war\n                                    with Iran or the price of burritos?\"\n                                </p>\n\n\n                                <p>\n                                    To those people I say that I am showing you\n                                    this because you have to understand. You\n                                    have to remember that these people, the\n                                    left, the liberals, are still exactly the\n                                    same.\n                                </p>\n\n\n                                <p>\n                                    Some moderate Republicans claimed that,\n                                    after three consecutive defeats, the\n                                    Democrats would abandon their strange,\n                                    radical ideology and become normal again.\n                                    That has not happened. It was never going to\n                                    happen.\n                                </p>\n\n\n                                <p>\n                                    Liberalism will always lead to degeneracy,\n                                    the transitioning of children, abortion on\n                                    demand, and the destruction of Christianity.\n                                    That is what it was created to do during the\n                                    French Revolution. The liberals wanted to\n                                    destroy the Church, and they killed many\n                                    people to make it happen.\n                                </p>\n                            </div>\n                        </div>\n\n\n                        <div class=\"transcript-entry\">\n                            <div class=\"speaker\">\n                                Michael Knowles\n                                <span class=\"timestamp\">14:27</span>\n                            </div>\n\n\n                            <div class=\"spoken-text\">\n                                <p>\n                                    What I am saying is that, regardless of your\n                                    disagreements with the Cruz administration,\n                                    whether you are a libertarian, a squishy\n                                    conservative, a hardcore conservative, a\n                                    neoconservative, a paleoconservative, or\n                                    whatever other label you prefer, we have to\n                                    remain united.\n                                </p>\n\n\n                                <p>\n                                    Because this is the alternative. This is the\n                                    person they want to nominate: a crazy\n                                    socialist who wants to kill babies.\n                                </p>\n                            </div>\n                        </div>\n                    </div>\n\n\n                    <section class=\"locked-content\">\n                        <div class=\"lock-icon\">●</div>\n\n\n                        <h3>Continue reading the transcript</h3>\n\n\n                        <p>\n                            Log in or create an account to access the remainder\n                            of this episode.\n                        </p>\n\n\n                        <a href=\"#\">Log in to continue</a>\n                    </section>\n                </section>\n            </article>\n\n\n            <aside class=\"episode-sidebar\">\n                <section class=\"sidebar-card\">\n<img\n    class=\"show-artwork\"\n    src=\"https://i.scdn.co/image/ab6765630000ba8aac62d1c340cbde4c75d7ab87\"\n    alt=\"The Michael Knowles Show\"\n>\n\n\n                    <h2>The Michael Knowles Show</h2>\n\n\n                    <p>\n                        Political commentary, culture, news, and analysis\n                        hosted by Michael Knowles.\n                    </p>\n\n\n                    <button class=\"follow-button\" type=\"button\">\n                        Follow podcast\n                    </button>\n                </section>\n\n\n                <section class=\"sidebar-card\">\n                    <h2>Episode information</h2>\n\n\n                    <ul class=\"episode-information\">\n                        <li>\n                            <strong>Episode</strong>\n                            2018\n                        </li>\n\n\n                        <li>\n                            <strong>Published</strong>\n                            Jul 17, 2026\n                        </li>\n\n\n                        <li>\n                            <strong>Show</strong>\n                            The Michael Knowles Show\n                        </li>\n\n\n                        <li>\n                            <strong>Language</strong>\n                            English\n                        </li>\n\n\n                        <li>\n                            <strong>Transcript status</strong>\n                            Complete\n                        </li>\n                    </ul>\n                </section>\n            </aside>\n        </div>\n    </main>\n\n\n    <footer class=\"site-footer\">\n    </footer>\n\n\n    <script>\n        /*\n         * Replace this with the real condition from the game.\n         * true: Newsom chose Condoleezza Rice.\n         */\n        const newsomVpIsRice = false;\n\n\n        const riceConditionalText = newsomVpIsRice\n            ? \"Frankly, we should have given her a statue for destroying Gavin Newsom's career. She was like Ralph Nader in a sad, gay remake. But apparently she does not intend to stop there. She wants to run for president herself, and I mean as a serious candidate.\"\n            : \"\";\n\n\n        document\n            .querySelectorAll(\"[data-rice-conditional]\")\n            .forEach((element) => {\n                element.textContent = riceConditionalText;\n            });\n\n\n        const searchInput = document.getElementById(\"transcript-search\");\n\n\n        searchInput.addEventListener(\"input\", () => {\n            const query = searchInput.value.trim();\n\n\n            document\n                .querySelectorAll(\".spoken-text p\")\n                .forEach((paragraph) => {\n                    const original =\n                        paragraph.dataset.original || paragraph.textContent;\n\n\n                    paragraph.dataset.original = original;\n                    paragraph.textContent = original;\n\n\n                    if (!query) return;\n\n\n                    const escaped = query.replace(\n                        /[.*+?^${}()|[\\]\\\\]/g,\n                        \"\\\\$&\"\n                    );\n\n\n                    paragraph.innerHTML = original.replace(\n                        new RegExp(`(${escaped})`, \"gi\"),\n                        \"<mark>$1</mark>\"\n                    );\n                });\n        });\n    </script>\n</body>\n</html>","format":"html","sourceLines":[17692,18920]},
@@ -110321,7 +110303,7 @@ function resolveDeadlockForLore(c) {
   if (!c.deadlock) return c;
 
   // Las rutas especiales tienen prioridad sobre la puntuación.
-  if (!c.demRfk && c.demEV <= 200 && c.spoilerEV >= 30) {
+  if (!c.demRfk && c.spoilerEV >= 30) {
     if (
       c.gop === 'Bush' &&
       /rice|condi/.test(normalize(c.gopVp)) &&
@@ -110857,7 +110839,8 @@ function selectLoreId(c) {
   const TIMELINE_GOP_2025 = {
     Pence: [10, 34, 350], Haley: [11, 35, 350], 'Trump Jr.': [12, 36, 360],
     Carlson: [15, 37, 360], Paul: [16, 38, 350], Walsh: [20, 39, 312],
-    Cruz: [21, 40, 350], Bush: [22, 41, 350], Cox: [24, 42, 350]
+    Cruz: [21, 40, 350], Bush: [22, 41, 350], Cox: [24, 42, 350],
+    Scott: [18, 18, 350]
   };
 
   function buildPresidentialTimeline(c, resolved, logScores = false) {
@@ -111532,6 +111515,15 @@ td.vp-cell { padding: 0; }
     {"name":"Secretary of Veterans Affairs","seal":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Seal_of_the_U.S._Department_of_Veterans_Affairs.svg/120px-Seal_of_the_U.S._Department_of_Veterans_Affairs.svg.png","people":[["Robert Wilkie","Secretary of Veterans Affairs","https://i.imgur.com/DdzcHGz.jpeg"],["Matt Rosendale","U.S. representative from Montana and former state auditor","https://i.imgur.com/OadW5uH.jpeg"],["Tulsi Gabbard","Former U.S. representative from Hawaii and Army veteran","https://i.imgur.com/qdWbKif.jpeg"],["Douglas Collins","Former U.S. representative from Georgia and Air Force Reserve chaplain","https://i.imgur.com/dLqWuwp.jpeg"],["Sam Brown","Retired Army captain and Afghanistan veteran","https://i.imgur.com/5yf7ifT.jpeg"],["Darin Selnick","Veterans policy advocate and former VA advisor","https://i.imgur.com/YFSXbLC.jpeg"],["Tanya Bradsher","Army veteran and former Obama White House official","https://i.imgur.com/kzD2Iqd.jpeg"],["Tammy Duckworth","U.S. senator from Illinois and Army veteran","https://i.imgur.com/HoJe7Qw.png"],["Patrick Murphy","Former U.S. representative from Pennsylvania and undersecretary of the Army","https://i.imgur.com/szbtnFE.jpeg"],["Denis McDonough","Former White House chief of staff under Obama","https://i.imgur.com/AxP2Pjr.png"],["Robert MacDonald","Former secretary of veterans affairs under Obama and Procter & Gamble CEO","https://i.imgur.com/VSqwZDQ.jpeg"]],"rows":{"Mike Pence":[1,0,0,[0.25,["add",0.75,[["socpol",">=",3]]]],0,0,0,0,0,0,0],"Nikki Haley":[1,0,0,0,[0.5,["add",0.5,[["forpol",">=",3]]]],0,0,0,0,0,0],"Donald Trump Jr.":[0,0,0,1,[0.5,["add",0.5,[["forpol",">=",3]]]],0,0,0,0,0,0],"Tucker Carlson":[0,0,1,0,0,[0.5,["add",1,[["vp","Marco Rubio"]]]],0,0,0,0,0],"Rand Paul":[0,0,1,0,0,[0.5,["add",-0.5,[["vp","Robert F. Kennedy Jr."]]]],0,0,0,0,0],"Matt Walsh":[0,0,[0.25,["add",0.75,[["vp","Paul Gosar"]]]],1,[0.5,["add",0.5,[["forpol",">=",3]]]],0,0,0,0,0,0],"Ted Cruz":[1,0.5,0,0,0.25,0,0,0,0,0,0],"Jeb Bush":[1,0,0,0,[1,["add",0.25,[["vp","JD Vance"]]]],0,0,0,0,0,[0.25,["add",0.75,[["vp","Condoleezza Rice"]]]]],"Spencer Cox":[0,0,0,0,0.5,0.5,0,0,0,0,0],"Punished Cox":[0,0,0,0,0.33,0,0,0,0,0,1],"Newsom/Warren":[0,0,0,0,0,0,0.5,1,0.25,0,0],"Newsom/Roem":[0,0,0,0,0,0,0,1,0,1,0],"Newsom/Tlaib":[0,0,0,0,0,0,0.25,0,1,0,0],"Newsom/Rice":[0,0,0,0,0,0,0,0,0,0.5,1],"RFK Jr.":[0,0,0.25,0,0,0,0,0,0,1,0.5],"Punished RFK Jr.":[0,0,1,0,0,0,0,0,0,0,0.25]}},
     {"name":"Secretary of Homeland Security","seal":"https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Seal_of_the_United_States_Department_of_Homeland_Security.svg/120px-Seal_of_the_United_States_Department_of_Homeland_Security.svg.png","people":[["Elaine Duke","Former acting secretary of homeland security and DHS deputy secretary","https://i.imgur.com/6OEBCIY.jpeg"],["Kristi Noem","Governor of South Dakota and former U.S. representative","https://i.imgur.com/huL57Qh.jpeg"],["Tom Homan","Former acting director of Immigration and Customs Enforcement","https://i.imgur.com/H1k6xCX.jpeg"],["Stephen Miller","Trump White House senior advisor on immigration policy","https://i.imgur.com/frWftKS.jpeg"],["Chad Wolf","Former acting secretary of homeland security.","https://i.imgur.com/P9oxUB7.jpeg"],["Mark Morgan","Former acting commissioner of U.S. Customs and Border Protection","https://i.imgur.com/GG78wcW.jpeg"],["Markwayne Mullin","U.S. senator from Oklahoma and former U.S. representative","https://i.imgur.com/GG6ewtu.jpeg"],["Christopher Krebs","Former director of the Cybersecurity and Infrastructure Security Agency","https://i.imgur.com/uz1gzHs.jpeg"],["Ken Cuccinelli","Former Virginia attorney general and acting U.S. immigration services director","https://i.imgur.com/XuVFOLw.jpeg"],["John Katko","Former U.S. representative from New York and federal prosecutor","https://i.imgur.com/hFxmU3A.jpeg"],["John Tien","Retired Army colonel and former Obama National Security Council official","https://i.imgur.com/6SQVM6z.jpeg"],["Ken Wainstein","Former White House homeland security advisor and Justice Department official","https://i.imgur.com/pM1ibr6.jpeg"],["Kristie Canegallo","Former White House deputy chief of staff under Obama","https://i.imgur.com/bWe0Tkx.jpeg"],["Alejandro Mayorkas","Former deputy secretary of homeland security under Obama","https://i.imgur.com/0B8Pyoj.jpeg"],["Ur Jaddou","Immigration lawyer and former chief counsel of U.S. Citizenship and Immigration Services","https://i.imgur.com/TUMV0Sb.jpeg"],["Elizabeth Sherwood-Randall","Former deputy secretary of energy and Obama National Security Council official","https://i.imgur.com/3F1DkmC.jpeg"]],"rows":{"Mike Pence":[1,[0.25,["add",0.25,[["socpol",">=",3]]]],[0,["add",1,[["socpol",">=",3]]]],0,1,0,0,0,0,[0,["add",1,[["campaignbreak",">=",2]]]],[0,["add",1,[["socpol","<=",-3]]]],0,0,0,0,0],"Nikki Haley":[1,[0.25,["add",0.25,[["socpol",">=",3]]]],[0,["add",1,[["socpol",">=",3]]]],0,1,0,0,0,0,[0,["add",1,[["campaignbreak",">=",2]]]],[0,["add",1,[["socpol","<=",-3]]]],0,0,0,0,0],"Donald Trump Jr.":[0,0,1,0,0,0,1,0,0.5,0,0,0,0,0,0,0],"Tucker Carlson":[0,1,1,0,0,0,0,0,1,0,0,0,0,0,0,0],"Rand Paul":[0,0,0,0,0,0,0,1,[1,["add",-0.5,[["socpol","<=",-2]]]],0,0,0,0,0,0,0],"Matt Walsh":[0,0,1,[0.5,["add",1,[["vp","Paul Gosar"]]]],0,0,0,0,1,0,0,0,0,0,0,0],"Ted Cruz":[0,0,0,0,1,1,[0.25,["add",0.75,[["socpol","<=",-3]]]],0,0,0,0,0,0,0,0,0],"Jeb Bush":[1,[0,["add",1,[["vp","JD Vance"]]]],0,0,0,0,0,0,0,1,0.25,0,0,0,0,0],"Spencer Cox":[1,0,0,0,0,0,0,0,0,1,0.1,0,0,0,0,0],"Punished Cox":[0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0],"Newsom/Warren":[0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1],"Newsom/Roem":[0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0],"Newsom/Tlaib":[0,0,0,0,0,0,0,0,0,0,0,0.5,0,0,1,0],"Newsom/Rice":[0,0,0,0,0,0,0,0,0,0,1,0,0,0.5,0,0],"RFK Jr.":[0,0,0.25,0,0,0,0,0,0,0,1,0,0,1,0,0],"Punished RFK Jr.":[0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0]}}
   ];
+    const penceHudWeights = {
+    'Ben Carson': 1,
+    'Tim Scott': 0.5,
+    'Lynne Patton': 0.5
+  };
+  const hud = CABINET_OFFICES.find(office =>
+    office.name === 'Secretary of Housing and Urban Development'
+  );
+  hud.rows['Mike Pence'] = hud.people.map(([name]) => penceHudWeights[name] ?? 0);
 const CABINET_DOCUMENT = `<!doctype html>
 <html lang="en">
 <head>
@@ -112114,14 +112106,13 @@ showNextHeirAchievement();
 }
   function picker(out, totv, aa, quickstats) {
     const context = loreContext(getContext(out, totv, aa, quickstats));
-    const id = selectId(context);
-    if (!id && !context.hasResults) {
+    const resolved = resolveDeadlockForLore(context);
+    const id = selectId(context, resolved);
+        if (!id && !context.hasResults) {
       current = null;
       sync();
       return typeof originalPicker === 'function' ? originalPicker.apply(this, arguments) : '';
     }
-
-    const resolved = resolveDeadlockForLore(context);
     const loreId = selectLoreId(resolved);
     const lore = loreId ? getLore(loreId, resolved) : null;
     const ending = id ? getEnding(id, context) : {
