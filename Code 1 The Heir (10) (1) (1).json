@@ -5,18 +5,7 @@ campaignTrail_temp.election_json = [
     "fields": {
       "year": 2024,
       "display_year": "The Heir",
-      "site_description": `<div style="position:absolute; left:50%; top:50%; width:1000px; display:block;">
-<p style="text-align: center;"><em>Content Warning: Racism, Sexism, Transphobia, Homophobia, Antisemitism, Xenophobia, Profanity.</em></p>
-<div style="width: 1000px; height: 120px; overflow: hidden; margin: 0 auto;"><img style="width: 1000px; transform: translateY(-120px);" src="https://media.gettyimages.com/id/1246337799/es/foto/washington-dc-u-s-president-donald-trump-shushes-journalists-before-signing-the-paycheck.webp?s=2048x2048&amp;w=gi&amp;k=20&amp;c=zYthcWZ6esDhZBizs0WadSOlq90XrsDjpiIYuGQ-8Zw=" alt="" />&nbsp;</div>
-<p style="text-align: center;">Welcome to <em>The Heir</em>.</p>
-<p style="text-align: center;">This mod is based on an Alternate History where Donald Trump won the 2020 election by taking Covid-19 seriously.</p>
-<p style="text-align: center;">You will answer questions related between the years 2021 and 2024.</p>
-<p style="text-align: center;">The answers will affect his popularity, both nationally and in individual states, and change the Republican and Democratic candidates in the election.</p>
-<p style="text-align: center;">The purpose of the game is to win as the Republican candidate.</p>
-<p style="text-align: center;">&nbsp;</p>
-<p style="text-align: center;"><strong>Are you ready?</strong></p>
-</div>
-`,
+      "site_description": "",
       "summary": `<p>In 2016, Donald John Trump shocked the world by becoming the first president of the United States without political experience. Against all odds he defeated the establishment&rsquo;s darling. He won by collecting the grievances of the downtrodden and the bigoted into a furious, fiery movement, encapsulated in a catchy slogan: <em>Make America Great Again.</em></p>
         <p>2020 was the trial by fire. And even with a global crisis, a one-in-a-century pandemic, and nationwide riots and unrest, Trump once again defied every prediction and decisively defeated former Vice President Joe Biden. From now on, we all live in Trumpmania.</p>
         <p>Now Trump stands at the latter half of his presidency. And despite all the rallies and tweets, America isn&rsquo;t great. The swamp remains, lurking and waiting for the moment its mortal enemy is gone. And the movement is searching, begging, for a successor, for a man who can cross the Jordan, for a new Don.</p>
@@ -47,7 +36,7 @@ if (innerWindow1 && innerWindow1.children[0]) {
   innerWindow1.children[0].innerHTML = "";
 }
 document.getElementById("inner_window_1").children[1].innerHTML = `
-<div style="position: relative; left: -20px; text-shadow: 0.06em 0.06em 0.6em white;">
+<div style="position: relative; text-shadow: 0.06em 0.06em 0.6em white;">
     <p style="text-align: center; margin: 0 auto 25px auto;"><strong><em>Content Warning: Racism, Sexism, Transphobia, Homophobia, Antisemitism, Xenophobia, Profanity.</em></strong></p>
 
     <h4 style="width: 800px; height: 150px; overflow: hidden; margin: 0 auto 50px auto;">
@@ -7929,6 +7918,176 @@ for (const element of readingScreen.querySelectorAll("p, div, span")) {
 
     root.dataset.mounted = "true";
   };
+})();
+
+;(() => {
+    const styleId = "heir-window-frame";
+    document.getElementById(styleId)?.remove();
+
+    const style = document.createElement("style");
+    style.id = styleId;
+    style.textContent = `
+body #game_window,
+body #game_window:has(#heir-further-reading) {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 600px !important;
+    min-height: 600px !important;
+    max-height: 600px !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+body #game_window > .game_header {
+    flex: 0 0 3rem;
+    box-sizing: border-box;
+    width: 100%;
+    margin-inline: 0;
+}
+
+body #game_window :is(#inner_window_1, #inner_window_2, #inner_window_3, #inner_window_4) {
+    box-sizing: border-box;
+    flex: 1 1 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-inline: 0 !important;
+    overflow-y: auto;
+}
+
+body #game_window :is(
+    #inner_window_1, #inner_window_2, #inner_window_3, #inner_window_4,
+    .inner_inner_window, .inner_window_question, .inner_window_w_desc,
+    #election_description_window,
+    #candidate_description_window, #running_mate_description_window,
+    #opponent_selection_description_window, #heir-settings-screen,
+    #main_content_area_reading, #recommended_reading_box
+) {
+    box-sizing: border-box;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+body #game_window:has(:is(#inner_window_1, #inner_window_2, #inner_window_3, #inner_window_4)),
+body #game_window.heir-settings-host {
+    display: flex !important;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+`;
+    document.head.appendChild(style);
+})();
+
+;(() => {
+    const key = "__heirKeepAdvisorFeedback";
+    window[key]?.stop();
+
+    const host = document.getElementById("game_window");
+    if (!host) return;
+
+    const selector = "button, input[type='button'], input[type='submit']";
+    const disableLabels = new Set([
+        "disable advisor feedback",
+        "don't give me advice",
+        "dont give me advice"
+    ]);
+    let restored = false;
+    const labelOf = control => (control.textContent || control.value || "")
+        .trim().toLowerCase().replace(/’/g, "'").replace(/\s+/g, " ");
+
+    function blockDisable(event) {
+        const control = event.target.closest?.(selector);
+        if (!control || !disableLabels.has(labelOf(control))) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }
+
+    function syncFeedbackControls() {
+        for (const control of host.querySelectorAll(selector)) {
+            const label = labelOf(control);
+            if (label === "enable advisor feedback" && !restored) {
+                restored = true;
+                control.click();
+            }
+            if (disableLabels.has(labelOf(control))) control.remove();
+        }
+    }
+
+    host.addEventListener("click", blockDisable, true);
+    const observer = new MutationObserver(syncFeedbackControls);
+    observer.observe(host, {
+        childList: true, subtree: true, characterData: true,
+        attributes: true, attributeFilter: ["value"]
+    });
+    window[key] = {
+        stop() {
+            observer.disconnect();
+            host.removeEventListener("click", blockDisable, true);
+        }
+    };
+    syncFeedbackControls();
+})();
+
+;(() => {
+    const id = "heir-intro-and-carousel-fix";
+    document.getElementById(id)?.remove();
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = `
+body #game_window #inner_window_1 {
+    width: calc(100% - 48px) !important;
+    margin: 8px 24px 18px !important;
+    border: 3px double #c9c9c9 !important;
+}
+
+#game_window:has(> #the_heir_candidate_vp_carousel) {
+    position: relative;
+    isolation: isolate;
+}
+
+#game_window:has(> #the_heir_candidate_vp_carousel) > .game_header {
+    position: relative;
+    z-index: 10021;
+}
+
+body:has(#game_window > #the_heir_candidate_vp_carousel)
+:is(#visit_window, #visit_overlay, #overlay, #advisors, #advisorsDiv, #answer_feedback),
+#game_window:has(> #the_heir_candidate_vp_carousel)
+:is(.overlay, .overlay_window) {
+    visibility: hidden !important;
+}
+
+#game_window > #the_heir_candidate_vp_carousel {
+    inset: 3rem 0 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-shadow: none !important;
+}
+
+#game_window > #the_heir_candidate_vp_carousel .the-heir-carousel-stage {
+    height: 100% !important;
+}
+
+#game_window > #the_heir_candidate_vp_carousel .the-heir-carousel-brand {
+    display: none !important;
+}
+
+#game_window > #the_heir_candidate_vp_carousel .the-heir-carousel-title {
+    top: 32px !important;
+}
+
+#game_window > #the_heir_candidate_vp_carousel .the-heir-carousel-description-window {
+    padding-top: 64px !important;
+}
+
+#game_window > #the_heir_candidate_vp_carousel .candidate-carousel-actions {
+    bottom: 44px !important;
+}
+`;
+    document.head.appendChild(style);
 })();
 
 //#endcode
