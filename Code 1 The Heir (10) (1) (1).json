@@ -10,7 +10,7 @@ campaignTrail_temp.election_json = [
         <p>2020 was the trial by fire. And even with a global crisis, a one-in-a-century pandemic, and nationwide riots and unrest, Trump once again defied every prediction and decisively defeated former Vice President Joe Biden. From now on, we all live in Trumpmania.</p>
         <p>Now Trump stands at the latter half of his presidency. And despite all the rallies and tweets, America isn&rsquo;t great. The swamp remains, lurking and waiting for the moment its mortal enemy is gone. And the movement is searching, begging, for a successor, for a man who can cross the Jordan, for a new Don.</p>
         <p>In 2024, the movement must find <span style="text-decoration: underline;"><strong><em>The Heir</em></strong></span>.</p>`,
-        "image_url": "https://i.imgur.com/3Ox8WOE.jpeg",
+        "image_url": "https://i.imgur.com/UYGIcVK.jpeg",
         "winning_electoral_vote_number": 270,
         "advisor_url": "https://i.imgur.com/3Ox8WOE.jpeg",
         "recommended_reading": '<div id="heir-further-reading"></div>',
@@ -251,7 +251,7 @@ jet_data = {
   "containerColor": "#231a1a",
   "innerWindowColor": "#ededed",
   "bannerImageUrl": "https://i.imgur.com/tGa9Lvj.jpeg",
-  "backgroundImageUrl": "https://i.imgur.com/lWZd4nc.jpeg",
+  "backgroundImageUrl": "https://i.imgur.com/1eeafpH.jpeg",
   "gameTitle": "THE HEIR",
   "customQuote": "",
   "endingTextColor": "#000000"
@@ -315,7 +315,7 @@ gameWindow.style.backgroundRepeat = "no-repeat";
     theme.coloring_window    = "#d1d1d1";
     theme.coloring_container = "#231a1a";
     theme.header_image = "https://i.imgur.com/tGa9Lvj.jpeg";
-    theme.body_background = "https://i.imgur.com/lWZd4nc.jpeg";
+    theme.body_background = "https://i.imgur.com/1eeafpH.jpeg";
     
 
 applyTheme(theme);
@@ -2541,6 +2541,7 @@ function submitName() {
 
   window.__assistantChosenName = chosenName;
   sessionStorage.setItem("assistantChosenName", chosenName);
+    window.setHeirOpeningMusic?.(chosenName);
 
   applyAssistantName(summary, chosenName);
 
@@ -3057,6 +3058,16 @@ function formatTime(seconds) {
     : `${mins}:${secs}`;
 }
 
+const HEIR_MARKY_MARK_SONGS = [
+  ["Come Together", "Michael Jackson", "https://i.imgur.com/MzAVzCg.jpeg", "https://audio.jukehost.co.uk/01a1c12a-86d1-729c-a4ea-8f4ea1b00f5f"],
+  ["Good Vibrations", "Marky Mark and the Funky Bunch", "https://i.imgur.com/hKD8dtB.jpeg", "https://audio.jukehost.co.uk/01a1c12a-878f-703f-aab4-eb43a9e82b30"],
+  ["I’m Your Boogie Man", "KC and the Sunshine Band", "https://i.imgur.com/gQjQGSO.jpeg", "https://audio.jukehost.co.uk/01a1c12d-a272-733a-9ec4-0cca8e6ac0e4"],
+  ["Paradise City", "Guns N’ Roses", "https://i.imgur.com/BH90mai.jpeg", "https://audio.jukehost.co.uk/01a1c12a-8874-719a-96aa-8a6cb7eea23d"],
+  ["Temple of Love", "The Sisters Of Mercy", "https://i.imgur.com/uhgHqBM.jpeg", "https://audio.jukehost.co.uk/01a1c12a-8993-721b-b37c-a34458cc9e67"],
+  ["The Show Must Go On", "Queen", "https://i.imgur.com/m0dySoz.jpeg", "https://audio.jukehost.co.uk/01a1c12a-872e-72c2-904d-9cd7a33d4460"]
+];
+const HEIR_MARKY_MARK_NAMES = new Set(["barbeta", "marky mark", "mark wahlberg"]);
+
 // setup
 function setupMusicPlayer() {
   const gameWindow = document.getElementById("game_window");
@@ -3086,6 +3097,20 @@ function setupMusicPlayer() {
   if (activePlaylist.songs.length === 0) {
     defaultSongs.forEach(data => activePlaylist.addSong(new Song(...data)));
   }
+
+  let usingMarkyMarkOpening = false;
+  window.setHeirOpeningMusic = function (name) {
+    const normalized = String(name || "").trim().toLowerCase().replace(/\s+/g, " ");
+    const useMarkyMark = HEIR_MARKY_MARK_NAMES.has(normalized);
+    if (!useMarkyMark && !usingMarkyMarkOpening) return;
+
+    const playlist = new Playlist();
+    const songs = useMarkyMark ? HEIR_MARKY_MARK_SONGS : defaultSongs;
+    songs.forEach(data => playlist.addSong(new Song(...data)));
+
+    usingMarkyMarkOpening = useMarkyMark;
+    changePlaylist(playlist);
+  };
 
   // inject CSS
   if (!document.getElementById("spotify-player-style")) {
@@ -4801,6 +4826,62 @@ if (TABUENCA_NAMES.has(name)) return [tabuenca];
 return BASE_DIFFICULTIES.filter(x => !x.special);
 }
 
+const presidentialListAchievements = [
+  "Glaube und Hoffnung", "Weltkrieg", "Tausendjährig", "Kulturkampf",
+  "Freiheit und Brot", "Blut und Ehre", "Luftwaffe", "Harzburger Front",
+  "Keine Nazi-Polka", "Nun, Dönitz", "Walküre", "Nuremberg"
+];
+
+const gavinChoiceAchievements = [
+  "Anti-Komintern", "Kristallnacht", "Barbarossa", "Munich", "Kolibri"
+];
+
+window.theHeirAchievementStorage = {
+  modName() {
+    return window.modBeingPlayed || "The Heir";
+  },
+
+  read() {
+    try {
+      const raw = typeof _rawStorageGetItem === "function"
+        ? _rawStorageGetItem.call(localStorage, "unlockedAch")
+        : localStorage.getItem("unlockedAch");
+
+      return JSON.parse(raw || "{}") || {};
+    } catch {
+      return null;
+    }
+  },
+
+  has(saved, title) {
+    if (!saved) return false;
+
+    const modName = this.modName();
+    if (saved[`${modName}:${title}`]) return true;
+
+    const legacy = saved[title];
+    if (legacy?.modName) return legacy.modName === modName;
+
+    return legacy === true &&
+      !Object.keys(saved).some(key => key.endsWith(`:${title}`));
+  }
+};
+
+window.heirHasAchievementGate = function (gate) {
+  const storage = window.theHeirAchievementStorage;
+  const unlocked = storage.read();
+  const has = title => storage.has(unlocked, title);
+  if (gate === "presidential-list") return presidentialListAchievements.some(has);
+  if (gate === "gavin-choice") return gavinChoiceAchievements.every(has);
+  return false;
+};
+
+function getAvailableSlideOptions() {
+  return window.heirHasAchievementGate("presidential-list")
+    ? SLIDE_OPTIONS
+    : SLIDE_OPTIONS.slice(0, 1);
+}
+
 function sanitizeSettings(raw = {}) {
 const difficulties = getAvailableDifficulties();
 const difficultyNames = difficulties.map(x => x.nativeName);
@@ -4818,7 +4899,7 @@ safeMode: SAFE_MODE_OPTIONS.includes(raw.safeMode)
   ? raw.safeMode
   : DEFAULT_SETTINGS.safeMode,
 
-slide: SLIDE_OPTIONS.some(option => option.value === Number(raw.slide))
+slide: getAvailableSlideOptions().some(option => option.value === Number(raw.slide))
   ? Number(raw.slide)
   : DEFAULT_SETTINGS.slide
 };
@@ -7180,7 +7261,7 @@ function carouselItems(key) {
 if (key === "language") return LANGUAGES;
 if (key === "difficulty") return getAvailableDifficulties();
 if (key === "safeMode") return SAFE_MODE_OPTIONS;
-return SLIDE_OPTIONS;
+return getAvailableSlideOptions();
 }
 
 function selectedIndex(key,items) {
@@ -7249,8 +7330,8 @@ control.value.textContent = item.label;
 
 const wraps = key !== "difficulty";
 
-control.left.disabled = !wraps && index === 0;
-control.right.disabled = !wraps && index === items.length - 1;
+control.left.disabled = items.length < 2 || (!wraps && index === 0);
+control.right.disabled = items.length < 2 || (!wraps && index === items.length - 1);
 }
 
 function renderAll(state) {
@@ -7457,21 +7538,55 @@ installSettingsScreen();
     ["Nicht liberal, nicht klerikal", "Return to your true self.", "oNnCsqy.jpeg"],
     ["Die Fahne Hoch", "Rise with his spirit, answer the call.", "sSzHIvY.jpeg"],
     ["Moral, dann Essen", "Win in the midst of a crisis.", "1J69iyT.jpeg"],
-    ["Walküre", "Win after being stabbed on the back.", "kZQ9bAn.jpeg"],
-    ["Nuremberg", "Win.", "L6CTDMu.jpeg"]
+    ["Landsberg", "Get what you deserve.", "1p4kXqg.jpeg", 32],
+    ["Übermensch", 'Win the game in <span class="heir-tabuenca">TABUENCA</span> difficulty.', "fGfg9aq.jpeg", 33],
+    ["Ahnenerbe", "Win the election with every ideology.", "fGfg9aq.jpeg", 34],
+    ["Walküre", "Win after being stabbed on the back.", "kZQ9bAn.jpeg", 30],
+    ["Nuremberg", "Win.", "L6CTDMu.jpeg", 31]
   ];
 
-  campaignTrail_temp.achievements = Object.fromEntries(
-    achievements.map(([title, description, cover]) => [
-      title,
-      {
-        image: "https://i.imgur.com/" + cover,
-        description,
-        cannotBeCheated: true
-      }
-    ])
-  );
+  const achievementStyle = document.createElement("style");
+  achievementStyle.textContent = '.heir-tabuenca { font-family: "Eagle Lake", serif; }';
+  document.head.appendChild(achievementStyle);
+
+campaignTrail_temp.achievements = {
+  "Glaube und Hoffnung": { image: "https://i.imgur.com/1U9JWmT.jpeg", description: "Win as Mike Pence.", heirId: 1, cannotBeCheated: true },
+  "Weltkrieg": { image: "https://i.imgur.com/85XgRB8.jpeg", description: "Win as Nikki Haley.", heirId: 2, cannotBeCheated: true },
+  "Tausendjährig": { image: "https://i.imgur.com/77XzJFJ.jpeg", description: "Win as Donald Trump Jr.", heirId: 3, cannotBeCheated: true },
+  "Kulturkampf": { image: "https://i.imgur.com/gFA8iZc.jpeg", description: "Win as Tucker Carlson.", heirId: 4, cannotBeCheated: true },
+  "Freiheit und Brot": { image: "https://i.imgur.com/o4fpprn.jpeg", description: "Win as Rand Paul.", heirId: 5, cannotBeCheated: true },
+  "Blut und Ehre": { image: "https://i.imgur.com/O5fPdYJ.jpeg", description: "Win as Matt Walsh.", heirId: 6, cannotBeCheated: true },
+  "Luftwaffe": { image: "https://i.imgur.com/AS8cFgt.jpeg", description: "Win as Ted Cruz.", heirId: 7, cannotBeCheated: true },
+  "Harzburger Front": { image: "https://i.imgur.com/hoi1zVv.jpeg", description: "Win as Jeb Bush.", heirId: 8, cannotBeCheated: true },
+  "Keine Nazi-Polka": { image: "https://i.imgur.com/4Akcrsp.jpeg", description: "Win as Spencer Cox.", heirId: 9, cannotBeCheated: true },
+  "Nun, Dönitz": { image: "https://i.imgur.com/G1hzqgJ.jpeg", description: "Win as the secret candidates.", heirId: 10, cannotBeCheated: true },
+  "Sieg": { image: "https://i.imgur.com/jqv7Uka.jpeg", description: "Win 350 or more Electoral Votes.", heirId: 11, cannotBeCheated: true },
+  "Ein Volk": { image: "https://i.imgur.com/Dh6tyGE.jpeg", description: "Win 500 or more Electoral Votes.", heirId: 12, cannotBeCheated: true },
+  "Gruppe Steiner": { image: "https://i.imgur.com/4CRbXuc.jpeg", description: "Win with a candidate you didn’t select.", heirId: 13, cannotBeCheated: true },
+  "Drumpfrei": { image: "https://i.imgur.com/brVxe8b.jpeg", description: "Win after betraying the leader.", heirId: 14, cannotBeCheated: true },
+  "Anti-Komintern": { image: "https://i.imgur.com/D6pgIGJ.jpeg", description: "Beat Newsom/Warren.", heirId: 15, cannotBeCheated: true },
+  "Kristallnacht": { image: "https://i.imgur.com/1KYQsfb.jpeg", description: "Beat Newsom/Roem.", heirId: 16, cannotBeCheated: true },
+  "Barbarossa": { image: "https://i.imgur.com/bUaXxLu.jpeg", description: "Beat Newsom/Tlaib.", heirId: 17, cannotBeCheated: true },
+  "Munich": { image: "https://i.imgur.com/EP1lhBU.jpeg", description: "Beat Newsom/Rice.", heirId: 18, cannotBeCheated: true },
+  "Kolibri": { image: "https://i.imgur.com/3cu70qb.jpeg", description: "Beat the secret opponent.", heirId: 19, cannotBeCheated: true },
+  "Erbgesundheit": { image: "https://i.imgur.com/2T6UqAP.jpeg", description: "Repeal Obamacare.", heirId: 20, cannotBeCheated: true },
+  "Volksgemeinschaft": { image: "https://i.imgur.com/GKywNMZ.jpeg", description: "Become a true champion of the working class.", heirId: 21, cannotBeCheated: true },
+  "Durchhalten": { image: "https://i.imgur.com/oqFhacs.jpeg", description: "Win the midterms.", heirId: 22, cannotBeCheated: true },
+  "Unschlagbar": { image: "https://i.imgur.com/oFbJd5z.jpeg", description: "Win the election while losing the popular vote.", heirId: 23, cannotBeCheated: true },
+  "Ein Reich": { image: "https://i.imgur.com/tBVDA14.jpeg", description: "Become the emperor you were always meant to be.", heirId: 24, cannotBeCheated: true },
+  "Kunst des Erfolgs": { image: "https://i.imgur.com/b1zXlKj.jpeg", description: "Become a real dealmaker.", heirId: 25, cannotBeCheated: true },
+  "Frieden führer": { image: "https://i.imgur.com/fiZ1TyN.jpeg", description: "Stay out of sand and death.", heirId: 26, cannotBeCheated: true },
+  "Nicht liberal, nicht klerikal": { image: "https://i.imgur.com/oNnCsqy.jpeg", description: "Return to your true self.", heirId: 27, cannotBeCheated: true },
+  "Die Fahne Hoch": { image: "https://i.imgur.com/sSzHIvY.jpeg", description: "Rise with his spirit, answer the call.", heirId: 28, cannotBeCheated: true },
+  "Moral, dann Essen": { image: "https://i.imgur.com/1J69iyT.jpeg", description: "Win in the midst of a crisis.", heirId: 29, cannotBeCheated: true },
+  "Landsberg": { image: "https://i.imgur.com/1p4kXqg.jpeg", description: "Get what you deserve.", heirId: 32, cannotBeCheated: true },
+  "Übermensch": { image: "https://i.imgur.com/fGfg9aq.jpeg", description: 'Win the game in <span class="heir-tabuenca">TABUENCA</span> difficulty.', heirId: 33, cannotBeCheated: true },
+  "Ahnenerbe": { image: "https://i.imgur.com/GhvyO4u.jpeg", description: "Win the election with every ideology.", heirId: 34, cannotBeCheated: true },
+  "Walküre": { image: "https://i.imgur.com/kZQ9bAn.jpeg", description: "Win after being stabbed on the back.", heirId: 30, cannotBeCheated: true },
+  "Nuremberg": { image: "https://i.imgur.com/L6CTDMu.jpeg", description: "Win.", heirId: 31, cannotBeCheated: true }
+};
 })();
+
 
 ;(() => {
   const requiredLoreAchievements = [
@@ -7829,14 +7944,11 @@ for (const element of readingScreen.querySelectorAll("p, div, span")) {
   }
 }
 
-    let unlocked = {};
-    try {
-      unlocked = JSON.parse(localStorage.getItem("unlockedAch") || "{}") || {};
-    } catch {
-      // Keep Lore locked if the achievement data cannot be read.
-    }
-
-    const loreUnlocked = requiredLoreAchievements.every(title => unlocked[title] === true);
+    const storage = window.theHeirAchievementStorage;
+    const unlocked = storage.read();
+    const loreUnlocked = requiredLoreAchievements.every(
+      title => storage.has(unlocked, title)
+    );
     const tabs = [
       ["overview", "Overview"],
       ["sources", "Sources"],
