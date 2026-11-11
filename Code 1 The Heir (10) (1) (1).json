@@ -4828,7 +4828,7 @@ return BASE_DIFFICULTIES.filter(x => !x.special);
 
 const presidentialListAchievements = [
   "Glaube und Hoffnung", "Weltkrieg", "Tausendjährig", "Kulturkampf",
-  "Freiheit und Brot", "Blut und Ehre", "Luftwaffe", "Harzburger Front",
+  "Freiheit und Brot", "Luftwaffe", "Harzburger Front",
   "Keine Nazi-Polka", "Nun, Dönitz", "Walküre", "Nuremberg"
 ];
 
@@ -7514,7 +7514,6 @@ installSettingsScreen();
     ["Tausendjährig", "Win as Donald Trump Jr.", "77XzJFJ.jpeg"],
     ["Kulturkampf", "Win as Tucker Carlson.", "gFA8iZc.jpeg"],
     ["Freiheit und Brot", "Win as Rand Paul.", "o4fpprn.jpeg"],
-    ["Blut und Ehre", "Win as Matt Walsh.", "O5fPdYJ.jpeg"],
     ["Luftwaffe", "Win as Ted Cruz.", "AS8cFgt.jpeg"],
     ["Harzburger Front", "Win as Jeb Bush.", "hoi1zVv.jpeg"],
     ["Keine Nazi-Polka", "Win as Spencer Cox.", "4Akcrsp.jpeg"],
@@ -7536,7 +7535,6 @@ installSettingsScreen();
     ["Kunst des Erfolgs", "Become a real dealmaker.", "b1zXlKj.jpeg"],
     ["Frieden führer", "Stay out of sand and death.", "fiZ1TyN.jpeg"],
     ["Nicht liberal, nicht klerikal", "Return to your true self.", "oNnCsqy.jpeg"],
-    ["Die Fahne Hoch", "Rise with his spirit, answer the call.", "sSzHIvY.jpeg"],
     ["Moral, dann Essen", "Win in the midst of a crisis.", "1J69iyT.jpeg"],
     ["Landsberg", "Get what you deserve.", "1p4kXqg.jpeg", 32],
     ["Übermensch", 'Win the game in <span class="heir-tabuenca">TABUENCA</span> difficulty.', "fGfg9aq.jpeg", 33],
@@ -7555,7 +7553,6 @@ campaignTrail_temp.achievements = {
   "Tausendjährig": { image: "https://i.imgur.com/77XzJFJ.jpeg", description: "Win as Donald Trump Jr.", heirId: 3, cannotBeCheated: true },
   "Kulturkampf": { image: "https://i.imgur.com/gFA8iZc.jpeg", description: "Win as Tucker Carlson.", heirId: 4, cannotBeCheated: true },
   "Freiheit und Brot": { image: "https://i.imgur.com/o4fpprn.jpeg", description: "Win as Rand Paul.", heirId: 5, cannotBeCheated: true },
-  "Blut und Ehre": { image: "https://i.imgur.com/O5fPdYJ.jpeg", description: "Win as Matt Walsh.", heirId: 6, cannotBeCheated: true },
   "Luftwaffe": { image: "https://i.imgur.com/AS8cFgt.jpeg", description: "Win as Ted Cruz.", heirId: 7, cannotBeCheated: true },
   "Harzburger Front": { image: "https://i.imgur.com/hoi1zVv.jpeg", description: "Win as Jeb Bush.", heirId: 8, cannotBeCheated: true },
   "Keine Nazi-Polka": { image: "https://i.imgur.com/4Akcrsp.jpeg", description: "Win as Spencer Cox.", heirId: 9, cannotBeCheated: true },
@@ -7577,7 +7574,6 @@ campaignTrail_temp.achievements = {
   "Kunst des Erfolgs": { image: "https://i.imgur.com/b1zXlKj.jpeg", description: "Become a real dealmaker.", heirId: 25, cannotBeCheated: true },
   "Frieden führer": { image: "https://i.imgur.com/fiZ1TyN.jpeg", description: "Stay out of sand and death.", heirId: 26, cannotBeCheated: true },
   "Nicht liberal, nicht klerikal": { image: "https://i.imgur.com/oNnCsqy.jpeg", description: "Return to your true self.", heirId: 27, cannotBeCheated: true },
-  "Die Fahne Hoch": { image: "https://i.imgur.com/sSzHIvY.jpeg", description: "Rise with his spirit, answer the call.", heirId: 28, cannotBeCheated: true },
   "Moral, dann Essen": { image: "https://i.imgur.com/1J69iyT.jpeg", description: "Win in the midst of a crisis.", heirId: 29, cannotBeCheated: true },
   "Landsberg": { image: "https://i.imgur.com/1p4kXqg.jpeg", description: "Get what you deserve.", heirId: 32, cannotBeCheated: true },
   "Übermensch": { image: "https://i.imgur.com/fGfg9aq.jpeg", description: 'Win the game in <span class="heir-tabuenca">TABUENCA</span> difficulty.', heirId: 33, cannotBeCheated: true },
@@ -7595,7 +7591,6 @@ campaignTrail_temp.achievements = {
     "Tausendjährig",
     "Kulturkampf",
     "Freiheit und Brot",
-    "Blut und Ehre",
     "Luftwaffe",
     "Harzburger Front",
     "Keine Nazi-Polka",
