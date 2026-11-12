@@ -24919,7 +24919,7 @@ function getDynamicVerminOpponents() {
         mid_high_mid: "continuing his first term policies",
         mid_high_low: "a European Conservative",
         mid_mid_high: "a Culture Warrior",
-        mid_mid_mid: "Syncrethic",
+        mid_mid_mid: "Syncretic",
         mid_mid_low: "a Moderate",
         mid_low_high: "a Right-Wing Populist",
         mid_low_mid: "a Populist",
@@ -24949,7 +24949,7 @@ function getDynamicVerminOpponents() {
         "continuing his first term policies": "#707070",
         "a European Conservative": "#4169a8",
         "a Culture Warrior": "#b00020",
-        "Syncrethic": "#6f42c1",
+        "Syncretic": "#6f42c1",
         "a Moderate": "#4f6f7a",
         "a Right-Wing Populist": "#d11616",
         "a R.I.N.O": "#5f8f9f",
@@ -36446,7 +36446,7 @@ function recordHeirIdeologyWin(context) {
     const label = ideology.label;
     const qualifier = /^continuing\b/i.test(label)
       ? "while " + label
-      : "as " + (label === "Syncrethic" ? "a " + label : label);
+      : "as " + (label === "Syncretic" ? "a " + label : label);
     const percent = victories.size * 10;
     heirAchievementQueue.push({
       heading: "You won the election " + qualifier,
