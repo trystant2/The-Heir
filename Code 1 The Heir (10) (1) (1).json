@@ -2482,14 +2482,17 @@ function validateAssistantName(name) {
 }
 
 const assistantFirstNames = [
-  "Adrian", "Clara", "Evelyn", "Miles", "Nora", "Julian", "Mabel", "Silas",
-  "Iris", "Victor", "Elena", "Hugo", "Lucia", "Oscar", "Celia", "Felix"
+  "Michael", "John", "James", "David", "Robert",
+  "William", "Daniel", "Joseph", "Richard", "Thomas",
+  "Mary", "Maria", "Jennifer", "Elizabeth", "Patricia",
+  "Linda", "Susan", "Jessica", "Barbara", "Karen"
 ];
 
 const assistantLastNames = [
-  "Ashcroft", "Wexford", "Hale", "Mercer", "Vale", "Whitlock", "Fairfax",
-  "Lockwood", "Briar", "Ellis", "Marlow", "Kerr", "Voss", "Bennett",
-  "Graves", "Carver"
+  "Smith", "Johnson", "Williams", "Brown", "Jones",
+  "Garcia", "Miller", "Rodriguez", "Davis", "Martinez",
+  "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson",
+  "Thomas", "Taylor", "Moore", "Lee", "Jackson"
 ];
 
 const randomAssistantNames = assistantFirstNames
@@ -4872,6 +4875,10 @@ window.heirHasAchievementGate = function (gate) {
   const has = title => storage.has(unlocked, title);
   if (gate === "presidential-list") return presidentialListAchievements.some(has);
   if (gate === "gavin-choice") return gavinChoiceAchievements.every(has);
+  if (gate === "candidate-boost") {
+    const titles = Object.keys(campaignTrail_temp.achievements || {});
+    return titles.length > 0 && titles.every(has);
+  }
   return false;
 };
 
@@ -5544,41 +5551,6 @@ installSettingsScreen();
 })();
 
 ;(() => {
-  const achievements = [
-    ["Glaube und Hoffnung", "Win as Mike Pence.", "1U9JWmT.jpeg"],
-    ["Weltkrieg", "Win as Nikki Haley.", "85XgRB8.jpeg"],
-    ["Tausendjährig", "Win as Donald Trump Jr.", "77XzJFJ.jpeg"],
-    ["Kulturkampf", "Win as Tucker Carlson.", "gFA8iZc.jpeg"],
-    ["Freiheit und Brot", "Win as Rand Paul.", "o4fpprn.jpeg"],
-    ["Luftwaffe", "Win as Ted Cruz.", "AS8cFgt.jpeg"],
-    ["Harzburger Front", "Win as Jeb Bush.", "hoi1zVv.jpeg"],
-    ["Keine Nazi-Polka", "Win as Spencer Cox.", "4Akcrsp.jpeg"],
-    ["Nun, Dönitz", "Win as the secret candidates.", "G1hzqgJ.jpeg"],
-    ["Sieg", "Win 350 or more Electoral Votes.", "jqv7Uka.jpeg"],
-    ["Ein Volk", "Win 500 or more Electoral Votes.", "Dh6tyGE.jpeg"],
-    ["Gruppe Steiner", "Win with a candidate you didn’t select.", "4CRbXuc.jpeg"],
-    ["Drumpfrei", "Win after betraying the leader.", "brVxe8b.jpeg"],
-    ["Anti-Komintern", "Beat Newsom/Warren.", "D6pgIGJ.jpeg"],
-    ["Kristallnacht", "Beat Newsom/Roem.", "1KYQsfb.jpeg"],
-    ["Barbarossa", "Beat Newsom/Tlaib.", "bUaXxLu.jpeg"],
-    ["Munich", "Beat Newsom/Rice.", "EP1lhBU.jpeg"],
-    ["Kolibri", "Beat the secret opponent.", "3cu70qb.jpeg"],
-    ["Erbgesundheit", "Repeal Obamacare.", "2T6UqAP.jpeg"],
-    ["Volksgemeinschaft", "Become a true champion of the working class.", "GKywNMZ.jpeg"],
-    ["Durchhalten", "Win the midterms.", "oqFhacs.jpeg"],
-    ["Unschlagbar", "Win the election while losing the popular vote.", "oFbJd5z.jpeg"],
-    ["Ein Reich", "Become the emperor you were always meant to be.", "tBVDA14.jpeg"],
-    ["Kunst des Erfolgs", "Become a real dealmaker.", "b1zXlKj.jpeg"],
-    ["Frieden führer", "Stay out of sand and death.", "fiZ1TyN.jpeg"],
-    ["Nicht liberal, nicht klerikal", "Return to your true self.", "oNnCsqy.jpeg"],
-    ["Moral, dann Essen", "Win in the midst of a crisis.", "1J69iyT.jpeg"],
-    ["Landsberg", "Get what you deserve.", "1p4kXqg.jpeg", 32],
-    ["Übermensch", 'Win the game in <span class="heir-tabuenca">TABUENCA</span> difficulty.', "fGfg9aq.jpeg", 33],
-    ["Ahnenerbe", "Win the election with every ideology.", "fGfg9aq.jpeg", 34],
-    ["Walküre", "Win after being stabbed on the back.", "kZQ9bAn.jpeg", 30],
-    ["Nuremberg", "Win.", "L6CTDMu.jpeg", 31]
-  ];
-
   const achievementStyle = document.createElement("style");
   achievementStyle.textContent = '.heir-tabuenca { font-family: "Eagle Lake", serif; }';
   document.head.appendChild(achievementStyle);
@@ -5613,7 +5585,7 @@ campaignTrail_temp.achievements = {
   "Moral, dann Essen": { image: "https://i.imgur.com/1J69iyT.jpeg", description: "Win in the midst of a crisis.", heirId: 29, cannotBeCheated: true },
   "Landsberg": { image: "https://i.imgur.com/1p4kXqg.jpeg", description: "Get what you deserve.", heirId: 32, cannotBeCheated: true },
   "Übermensch": { image: "https://i.imgur.com/fGfg9aq.jpeg", description: 'Win the game in <span class="heir-tabuenca">TABUENCA</span> difficulty.', heirId: 33, cannotBeCheated: true },
-  "Ahnenerbe": { image: "https://i.imgur.com/GhvyO4u.jpeg", description: "Win the election with every ideology.", heirId: 34, cannotBeCheated: true },
+  "Ahnenerbe": { image: "https://i.imgur.com/GhvyO4u.jpeg", description: "Win the election with 10 different ideologies.", heirId: 34, cannotBeCheated: true },
   "Walküre": { image: "https://i.imgur.com/kZQ9bAn.jpeg", description: "Win after being stabbed on the back.", heirId: 30, cannotBeCheated: true },
   "Nuremberg": { image: "https://i.imgur.com/L6CTDMu.jpeg", description: "Win.", heirId: 31, cannotBeCheated: true }
 };
