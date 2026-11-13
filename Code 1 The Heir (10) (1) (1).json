@@ -2922,25 +2922,13 @@ function changePlaylist(newPlaylist) {
     updatePlayPauseIcon(true);
   }
 }
-let heirPlaylistBeforeEnding = null;
-
 window.playHeirEndingTrack = function (title, artist, coverLink, audioLink) {
-  heirPlaylistBeforeEnding ??= activePlaylist;
-
   const endingPlaylist = new Playlist();
   endingPlaylist.addSong(new Song(title, artist, coverLink, audioLink));
   changePlaylist(endingPlaylist);
 };
 
-document.addEventListener("click", event => {
-  if (!event.target.closest?.("#play_again_button") || !heirPlaylistBeforeEnding) {
-    return;
-  }
 
-  const playlist = heirPlaylistBeforeEnding;
-  heirPlaylistBeforeEnding = null;
-  changePlaylist(playlist);
-}, true);
 
 window.changePlaylist = changePlaylist;
 
@@ -4136,9 +4124,11 @@ const css = `
     text-align: left;
 }
 
+#state_result_data_summary th,
 #overall_details_container table th {
     font-family: "Montserrat", Arial, sans-serif !important;
 }
+#results_container:has(#drop_down_area_state)>.title_h3{color:#fff}
 
 			#state_result_data_summary table th:first-child,
 			#overall_details_container table th:first-child,
@@ -4869,13 +4859,18 @@ window.theHeirAchievementStorage = {
   }
 };
 
+window.heirCheatsOn = () =>
+  (typeof cheatsActive !== "undefined" && cheatsActive === true) ||
+  (typeof cheats !== "undefined" && +cheats === 1) || +window.cheats === 1;
+
 window.heirHasAchievementGate = function (gate) {
+  if (gate === "presidential-list" && window.heirCheatsOn()) return true;
   const storage = window.theHeirAchievementStorage;
   const unlocked = storage.read();
   const has = title => storage.has(unlocked, title);
   if (gate === "presidential-list") return presidentialListAchievements.some(has);
   if (gate === "gavin-choice") return gavinChoiceAchievements.every(has);
-  if (gate === "candidate-boost") {
+  if (gate === "candidate-boost" || gate === "all-achievements") {
     const titles = Object.keys(campaignTrail_temp.achievements || {});
     return titles.length > 0 && titles.every(has);
   }
@@ -5638,8 +5633,8 @@ campaignTrail_temp.achievements = {
     }
 
     #heir-reading-tabs button {
-      flex: 0 1 130px;
-      min-width: 0;
+      flex: 0 1 180px;
+      min-width: max-content;
       min-height: 40px;
       margin: 0;
       padding: 8px 10px;
@@ -5666,7 +5661,7 @@ campaignTrail_temp.achievements = {
       outline-offset: -3px;
     }
 
-    #heir-reading-lock-tip {
+    .heir-reading-lock-tip {
       position: absolute;
       bottom: calc(100% + 6px);
       left: 50%;
@@ -5687,13 +5682,11 @@ campaignTrail_temp.achievements = {
       transition: opacity 120ms ease, visibility 120ms ease;
     }
 
-    #heir-reading-tabs:has(#heir-reading-tab-lore[aria-disabled="true"]:hover)
-      #heir-reading-lock-tip,
-    #heir-reading-tabs:has(#heir-reading-tab-lore[aria-disabled="true"]:focus-visible)
-      #heir-reading-lock-tip {
-      visibility: visible;
-      opacity: 1;
-    }
+#heir-reading-tabs button[aria-disabled="true"]:is(:hover, :focus-visible)
+  + .heir-reading-lock-tip {
+  visibility: visible;
+  opacity: 1;
+}
 
     #heir-reading-body {
       box-sizing: border-box;
@@ -5771,12 +5764,14 @@ campaignTrail_temp.achievements = {
       margin: 1rem 0;
     }
 
-    #heir-reading-body .heir-reading-gallery img,
+        #heir-reading-body .heir-reading-gallery img,
     #heir-reading-body .heir-reading-map {
       display: block;
       width: 100%;
       height: auto;
     }
+    #heir-reading-body .heir-reading-map{width:33.3%}
+    
   #game_window:has(#heir-further-reading) {
   display: flex !important;
   flex-direction: column;
@@ -5922,15 +5917,19 @@ campaignTrail_temp.achievements = {
         alt="2020 Senate results in The Heir" loading="lazy">
 
       <h3>Trump Cabinet</h3>
+      <img class="heir-reading-map" src="https://i.imgur.com/AUjdgRJ.jpeg" alt="Trump Cabinet" loading="lazy">
     `,
-
+          "final-thoughts": `<h2>Final thoughts</h2><p>Thank you for completing every achievement in The Heir! Frankly, you deserve a reward. And I wish I could give you one. Unfortunately, the best I have to offer is a long, leisurely reflection on the game and its messages. Since you've devoted so much time to completing it, perhaps you'll find it interesting. Let's engage in a little Socratic questioning and explain what this whole thing is about through a series of questions.</p><h3>Why did you create The Heir?</h3><p>A few years ago, someone said they wanted to create a mod about the American right from the perspective of the right itself, and things didn't go particularly well for them. I'm not American, but I've always had a great fascination with the American right, from the days of Goldwater and Nixon to those of Nick Fuentes, and I'm particularly interested in Donald John Trump, a man who will go down in history as one of the great figures of the 21st century. Since I'm not American, I believe I could offer a perspective untainted by the country's bitter political and cultural battles. I'm not a Trumpist, nor do I particularly like the guy. In fact, I personally believe he belongs in prison. But I can appreciate that he is undoubtedly a man with considerable charisma, an excellent salesman, and someone who has understood, at least to some extent, the underlying impulses of the American people.</p><h3>I think some candidates are missing, like Hawley or DeSantis, while others, like Jeb Bush, shouldn't be there. Why did you choose this particular roster of Heirs?</h3><p>My idea when writing the Heirs was to capture, through eight individuals, the different currents of the American right within Trumpism, and I divided them into three categories. The Conservatives represent Trumpism proper, that mixture of populism still subjected, more or less strictly, to the structure of a conservative party: Haley and Pence as political animals struggling to survive, and Trump Jr. as an exaggerated version of his father, a man without any political project, driven toward power solely for the sake of power itself. The Revolutionaries represent post-Trumpism, those who will inherit the different currents of the MAGA movement: Carlson embodies working-class populism and nativism and Paul represents a systematic distrust of public institutions. Finally, the Reformists represent pre-Trumpism, the remnants of the old GOP: Bush is the last of the Mohicans of the Republican old guard, Cox is a sort of Mormon "Rockefeller Republican," and Cruz, although a radical, is a radical of the old school, of Reaganism.</p><p>Had I included Josh Hawley or Marco Rubio, they would have overlapped with Carlson and Cruz, so I decided to leave them out. Some people might think this is an excessively fictional roster, and I believe that's a legitimate criticism, but personally, I wouldn't have done it any other way. I have no plans for any DLC or expansion in the future, but if someone wants to add these characters on their own, as was done with the <em>Definitive Edition</em> of <em>Obamanation</em>, I would be deeply honored. That last part is probably wishful thinking.</p><h3>Is The Heir a liberal or a conservative mod?</h3><p>Neither. It's not a Trumpist mod, given that I'm quite critical of the President (he deserves it), and the game's good ending consists of the Republican Party repudiating him and moving on (now <em>that's</em> a fantasy). But I wouldn't say it's a mod that tries to deliver a particularly clear-cut message about who the good guys and bad guys are in American politics, mainly because I believe that good and evil in politics are relative concepts. I've tried to portray the different Heirs as the people they are, although it's true that in some cases their characteristics have been exaggerated a little for gameplay purposes, but not to create the impression that one candidate or another is inherently good or bad. If I had to say something positive about the different candidates, I'd say that I respect Cox's genuine humanity, Nikki Haley's and Elizabeth Warren's perseverance, Rand Paul's and Rashida Tlaib's devotion to an ideological cause, and Mike Pence's piety. But I've tried to make the game enjoyable even for people who don't share my opinions. It's not your fault that you're wrong.</p><p>(That last part is a joke.)</p><h3>If I had to take away just one lesson from this mod, what would it be?</h3><p>Extremism and populism are misguided solutions to real problems. We must fight against the antidemocratic and authoritarian forces of the world, but we must also understand why so many people come to support them, and treat those people not with hatred, but with respect.</p><h3>Do you have any other projects planned after The Heir?</h3><p>Yes, but I think I'll take a break from working on these games for now. It's a bit exhausting, you know? Still, I can't deny that I have a wonderful time writing, editing, coming up with ideas, and receiving your feedback. The Campaign Trail is a game I play quite often, whenever I'm bored or just looking to kill some time, and my only wish is that, during your own moments of boredom, The Heir might also provide you with some entertainment. Some people believe that video games should be a form of high art, like paintings in a museum. I prefer to see them as the perfect fusion of art and play, of entertainment and reflection.</p><p>Best regards, and until next time.</p><p>— Trystant</p>`,
     credits: `
       <h2>Credits</h2>
 
       <p><em>The Heir</em> owes a lot to the mods that came before it. Its candidate selection system adapts the Republican side of <em>Things That Never Were</em>. The opposing party always fields the same candidate, but their campaign changes in response to your actions, as in <em>All The Way</em>. The economic system was inspired by <em>Our Revolution</em>. I also used code from <em>Hope</em> and <em>Little Big Man</em> for the achievements, list of presidents, and cabinet, and from <em>An Old Cycle</em> for the Spotify window. Special thanks to Strawberry Master for that code, as well as for the County Map, data visualizer, and Campaign Polling History. Thanks also to mangolith, thatchmaster, Literally Nelson Rockefeller, ItsAstronomics, and Jet for the Modding Tool. Go play their games, too. You’ll probably enjoy them as much as mine, if not more.</p>
 
       <p>But the biggest help in making this mod was undoubtedly ChatGPT and its Codex tool. I should disclose that most of the game’s code was generated by AI. It also helped me translate the endings, since English isn’t my first language. The text you’re reading right now was translated by AI. I also used it to age some of the portraits in the list of presidents. I think this little tool is going to change the world and make countless things easier for us. I understand why some people are wary of it, but to me, fighting it is like fighting the arrow of time.</p>
-    `
+    
+      <p>Finally, I'd like to thank everyone who beta-tested the game and suggested changes and improvements. Special thanks to Cod Author for his support during development. And above all, a huge thank you to Sam!, without whom this mod would very probably never have made it onto this platform.</p>
+
+      `
   };
 
   window.mountHeirFurtherReading = function (assistantName) {
@@ -5952,24 +5951,26 @@ for (const element of readingScreen.querySelectorAll("p, div, span")) {
     const loreUnlocked = requiredLoreAchievements.every(
       title => storage.has(unlocked, title)
     );
-    const tabs = [
+        const tabs = [
       ["overview", "Overview"],
       ["sources", "Sources"],
-      ["lore", "Lore"],
+      ["lore", "Lore", loreUnlocked ? "" : "Win with all the candidates to unlock this section."],
+      ["final-thoughts", "Final Thoughts", window.heirHasAchievementGate("all-achievements")
+        ? "" : "Complete every achievement to unlock this section."],
       ["credits", "Credits"]
     ];
 
     root.innerHTML = `
       <style>${styles}</style>
       <div id="heir-reading-tabs" role="tablist" aria-label="Further Reading">
-        ${tabs.map(([key, title]) => {
-          if (key === "lore" && !loreUnlocked) {
+        ${tabs.map(([key, title, lockMessage]) => {
+          if (lockMessage) {
             return `
-              <button type="button" id="heir-reading-tab-lore"
-                role="tab" aria-selected="false" aria-disabled="true"
-                aria-label="Locked section" aria-describedby="heir-reading-lock-tip">?</button>
-              <span id="heir-reading-lock-tip" role="tooltip">
-                Win with all the candidates to unlock this section.
+              <button type="button" id="heir-reading-tab-${key}"
+                role="tab" aria-selected="false" aria-disabled="true" aria-label="${title}"
+                aria-describedby="heir-reading-lock-tip-${key}">?</button>
+              <span id="heir-reading-lock-tip-${key}" class="heir-reading-lock-tip" role="tooltip">
+                ${lockMessage}
               </span>
             `;
           }
@@ -5981,7 +5982,7 @@ for (const element of readingScreen.querySelectorAll("p, div, span")) {
       </div>
 
       <div id="heir-reading-body" tabindex="0">
-        ${tabs.filter(([key]) => key !== "lore" || loreUnlocked).map(([key]) => `
+        ${tabs.filter(([, , lockMessage]) => !lockMessage).map(([key]) => `
           <section id="heir-reading-panel-${key}" role="tabpanel"
             data-reading-panel="${key}" aria-labelledby="heir-reading-tab-${key}"
             ${key === "overview" ? "" : "hidden"}>
