@@ -2281,7 +2281,7 @@ campaignTrail_temp.candidate_state_multiplier_json = rows([["campaign_trail.cand
 [2505,1001,1005,0.96],
 [2506,1001,1006,0.9],
 [2507,1001,1007,0.86],
-[2508,1001,1008,1],
+[2508,1001,1008,1.05],
 [2509,1001,1009,1],
 [2510,1001,1010,0.96],
 [2511,1001,1011,0.96],
@@ -2332,7 +2332,7 @@ campaignTrail_temp.candidate_state_multiplier_json = rows([["campaign_trail.cand
 [2556,1003,1005,1.0878],
 [2557,1003,1006,1],
 [2558,1003,1007,1.04915],
-[2559,1003,1008,0.96],
+[2559,1003,1008,0.91],
 [2560,1003,1009,1],
 [2561,1003,1010,1.285],
 [2562,1003,1011,0.528],
@@ -7753,7 +7753,7 @@ campaignTrail_temp.answer_feedback_json = rows([["campaign_trail.answer_feedback
 [48762,47701,1001,"A few weeks later, the only notable opponent of Pence, Secretary Haley, repeats to all the news outlets that she’s not running, and Mike’s lead in the polls only grows larger. After many months of endless work, you take a much needed break to the nearest cinema, and spend the last two hours mindlessly watching <i> Barbie </i>, which makes you think about the women who died from sepsis because of our new anti-abortion laws. You feel sad for that woman, but the Democrats are really blowing it out of proportion. When the movie ends, you think it wasn’t great."],
 [48776,48775,1001,"Pence lead in the polls only grows larger, only bugged two or three congressmen or media stars in need of attention. After many months of endless work, you take a much needed break to the nearest cinema, and spend the last two hours mindlessly watching <i> Barbie </i>, which makes you think about the women who died from sepsis because of our new anti-abortion laws. You feel sad for that woman, but the Democrats are really blowing it out of proportion. When the movie ends, you think it wasn’t great."],
 [48788,47760,1001,"Pence won’t quit, he keeps touring the countryside, the usual places, the Bible Belt and his home state of Indiana. In every town he keeps delivering the same boring jabs, about lowering taxes and cutting red tape. But we’ve had eight years of that Mike, and Americans get tired quickly."],
-[48791,48055,1001,"Endorsements come in like floodwater, with only the last bloc of the neocons pleading their doubts about a Carlson presidency. Liberals are terrified, finally discovering there’s someone more terrifying than Trump. Governor Pritzker, trying to salvage his tumbling campaign, sneers that he would love to crush Tucker in an election. The only one who hasn’t fully grasped the situation is Tucker himself, who reportedly feels a little uneasy about the whole thing. He didn’t expect this to blow up."],
+[48791,48055,1001,"Endorsements come in like floodwater, with only the last bloc of the neocons pleading their doubts about a Carlson presidency. Governor Pritzker, trying to salvage his tumbling campaign, sneers that he would love to crush Tucker in an election. The only one who hasn’t fully grasped the situation is Tucker himself, who reportedly feels a little uneasy about the whole thing. He didn’t expect this to blow up."],
 [48808,48114,1001,"In the following weeks, information leaks like a broken sewer, about racist text messages and a deepening rift between the company and its star. Still the affair rips the movement apart, between Tuckerards and anti-Tuckerards. Trump takes part of the conversation, saying that he liked Tucker, “but ultimately, he went too far. Too far. Especially on Russia, very weak on Russia.” The man in question is announcing his own platform, but platforms like Spotify have already refused to give him a space."],
 [48811,48173,1001,"In 24 hours, other billionaires stars like Peter Thiel announce donations to Paul’s campaign. Thiel says he once renounced democracy, but is willing to give it a try. Paul lessens his visits to small-towns and the national marihuana association to country-clubs and executive meetings. Candidates once considered shoo-ins announce they have no intention of running. Now, some say that the most remarkable issue is the flooding of social media: Thousands of anonymous accounts, with eccentric names and pictures of Patrick Bateman, writing that Paul’s presidency will be like the second coming of Christ. But you know most of these people can’t vote."],
 [48830,48232,1001,"Trump’s tweet triggers a wave of condemnation from the establishment GOP and the podcasters. Crowder makes a not subtle joke about Paul’s masculinity, and Hawley sneers that while he respectfully disagrees with his colleague, the era of libertarianism in the Republican Party is over. Soon you receive a call from your employers, telling you to end the operation. While looking at the dossier, you recall a photo of Paul, fixate on his smug face and weird hair. You tossed it into the garbage."],
@@ -8124,7 +8124,7 @@ campaignTrail_temp.answer_feedback_json = rows([["campaign_trail.answer_feedback
 [52142,52141,1001,[459]],
 [52162,52161,1001,"It’s cheap and we all know it, but while Trump shakes the hands of the survivors and gifts them with red hats, Thune, ${minority} and Pence deliver a small aid package to the damaged areas, not anything fancy, not enough to reap the political benefits."],
 [52168,52167,1001,[460]],
-[52173,52172,1001,"The bombs may be falling, but else could you do, except going to Jerusalem? The trip itself it’s a publicity stunt, a challenge to the mullahs. You face the wall and wear the Sheitel, as Israeli officials call Donald Trump and Nikki Haley the greatest friends Israel has ever had. In a private meeting with Bibi and Ben-Gvir, they put forward their plan of settling Gaza, expelling the two millions Palestinians and relocating them to Somaliland. You gulp, and give them enthusiastic approval."],
+[52173,52172,1001,"The bombs may be falling, but else could you do, except going to Jerusalem? The trip itself it’s a publicity stunt, a challenge to the mullahs. You face the wall and wear the Sheitel, as Israeli officials call Donald Trump and Nikki Haley the greatest friends Israel has ever had. In a private meeting with Smotrich and Ben-Gvir, they put forward their plan of settling Gaza, expelling the two millions Palestinians and relocating them to Somaliland. You gulp, and give them enthusiastic approval."],
 [52178,52177,1001,"The bombs may be falling, but else could you do, except going to Jerusalem? The trip itself it’s a publicity stunt, a challenge to the mullahs. You face the wall and wear the Sheitel, as Israeli officials call Donald Trump and Nikki Haley the greatest friends Israel has ever had. In a private meeting with Bibi and Ben-Gvir, they ask you if, after the mullahs fall, Erdogan could come next."],
 [52189,52188,1001,"According to the State Department, it’s really dangerous, but Trump doesn’t care and you two go to Crimea, declaring in the middle of Sevastopol that this is Ukrainian territory, for our great Ukrainian allies, for the security of democracies around the world. As Putin’s Russia dies ignobly, Ben Shapiro writes an enthusiastic op-ed for The Daily Wire, later read on his show, “Nikki Haley has the potential to be the greatest President in my lifetime”."],
 [52195,52194,1001,"“What a bitch!” You can almost hear the words stabbing your ears as you announce your decision. The Trump family pressures to have your name removed from the ballot, and a fraction of the party agrees. But far away, in the political landscape, your bravery is met with applause and a new intention to forgive."],
@@ -18928,7 +18928,7 @@ window.applyHeirGeneralElectionPictures =
                 }
 
                 if (context.vpTrumpJr) {
-                    answerSwapper(51947, 51970, false);
+                    answerSwapper(51970, 51947, false);
                 }
             }
 
@@ -26913,25 +26913,25 @@ function applyHeirQuestion22AnswerSwaps(
 
     switch (heirKey) {
         case "Pence":
-            if (popValue < 5) {
+            if (popValue <= 5) {
                 swaps.push([49040, 49586]);
             }
 
-            if (policyMean < -3) {
+            if (policyMean <= -3) {
                 swaps.push([49044, 49626]);
-            } else if (policyMean > -3 && policyMean < 3) {
+            } else if (policyMean > -3 && policyMean <= 3) {
                 swaps.push([49044, 49590]);
             }
             break;
 
         case "Haley":
-            if (popValue < 5) {
+            if (popValue <= 5) {
                 swaps.push([49056, 49657]);
             }
 
-            if (socpolValue < -3) {
+            if (socpolValue <= -3) {
                 swaps.push([49059, 49711]);
-            } else if (socpolValue > -3 && socpolValue < 3) {
+            } else if (socpolValue > -3 && socpolValue <= 3) {
                 swaps.push([49059, 49665]);
             }
             break;
@@ -26943,15 +26943,15 @@ function applyHeirQuestion22AnswerSwaps(
 
             if (popValue < 0) {
                 swaps.push([49071, 49836]);
-            } else if (popValue > 0 && popValue < 5) {
+            } else if (popValue >= 0 && popValue < 5) {
                 swaps.push([49071, 49781]);
             }
             break;
 
         case "Carlson":
-            if (ecopolValue < -3) {
+            if (ecopolValue <= -3) {
                 swaps.push([49076, 49918]);
-            } else if (ecopolValue > -3 && ecopolValue < 3) {
+            } else if (ecopolValue > -3 && ecopolValue <= 3) {
                 swaps.push([49076, 49871]);
             }
 
@@ -26961,9 +26961,9 @@ function applyHeirQuestion22AnswerSwaps(
             break;
 
         case "Paul":
-            if (ecoValue < -3) {
+            if (ecoValue <= -3) {
                 swaps.push([49088, 49991]);
-            } else if (ecoValue > -3 && ecoValue < 5) {
+            } else if (ecoValue > -3 && ecoValue <= 5) {
                 swaps.push([49088, 49973]);
             }
 
@@ -26973,19 +26973,19 @@ function applyHeirQuestion22AnswerSwaps(
             break;
 
         case "Cruz":
-            if (popValue < -2) {
+            if (popValue <= -2) {
                 swaps.push([49112, 50035]);
             }
 
-            if (ecoValue < -3) {
+            if (ecoValue <= -3) {
                 swaps.push([49119, 50054]);
-            } else if (ecoValue > -3 && ecoValue < 5) {
+            } else if (ecoValue > -3 && ecoValue <= 5) {
                 swaps.push([49119, 50050]);
             }
             break;
 
         case "Bush":
-            if (unrestValue < 3) {
+            if (unrestValue <= 3) {
                 swaps.push([49128, 50107]);
             }
 
@@ -35548,7 +35548,7 @@ function top(list) {
           const end = runAgain ? 2041 : 2037;
           if (is('Walsh') && !wasVp('Paul Gosar')) {
             future({ row: 84 }, 2033, end, 'R');
-          } else if (is('Paul') && !/kennedy|rfk/i.test(vp) && sp <= -3) {
+          } else if (is('Paul') && !/kennedy|rfk/i.test(vp) && sp <= 0) {
             future({ row: 94 }, 2033, tax < 0 ? 2041 : 2037, 'R');
           } else {
             const portraits = TIMELINE_PORTRAITS[83];
@@ -36806,5 +36806,4 @@ if (musicKey === previousMusicKey) {
     autoplayHandle = window.setInterval(autoplayWithHeirPopups, 50);
   }
 })();
-
 
