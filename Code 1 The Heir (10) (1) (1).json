@@ -1822,7 +1822,7 @@ function installCandidateActionButtons() {
   }
 
   const allButtons = Array.from(
-    document.querySelectorAll('button, input[type="button"], input[type="submit"]')
+  gameWindow.querySelectorAll('button, input[type="button"], input[type="submit"]')
   ).filter((button) => !button.classList.contains("candidate-carousel-arrow"));
 
   const existingBack = Array.from(actionBar.children).find(
@@ -2004,7 +2004,7 @@ function installAssistantActionButtons(isUnlocked) {
   }
 
   const allButtons = Array.from(
-    document.querySelectorAll('button, input[type="button"], input[type="submit"]')
+  gameWindow.querySelectorAll('button, input[type="button"], input[type="submit"]')
   ).filter((button) => !button.classList.contains("candidate-carousel-arrow"));
 
   const existingBack = Array.from(actionBar.children).find(
@@ -2216,16 +2216,11 @@ Motherfucker
 Dickhead
 Shithead
 Bastard
-Prick
 Douchebag
 Jackass
 Idiot
-Moron
 Retard
-Dumbass
 Fuckwit
-Twat
-Wanker
 Pussy
 Cock
 Faggot
@@ -2239,8 +2234,6 @@ Wetback
 Cracker
 Redneck
 Hillbilly
-Trailer trash
-White trash
 Slut
 Whore
 Skank
@@ -2248,16 +2241,6 @@ Hoe
 Thot
 Cumdump
 Cumslut
-Dick
-Tool
-Loser
-Nerd
-Geek
-Freak
-Weirdo
-Psycho
-Maniac
-Nutjob
 Crazy bitch
 Asswipe
 Shitstain
@@ -2268,57 +2251,23 @@ Shit-for-brains
 Cock sucker
 Ass kisser
 Brown noser
-Bootlicker
-Snake
-Rat
-Backstabber
-Traitor
 Scumbag
 Lowlife
-Degenerate
-Pervert
-Creep
 Pedo
 Rapist
 Nazi
 Commie
-Libtard
-Trumptard
-Snowflake
 Cuck
 Beta
 Soyboy
 Incel
-Virgin
-Simp
-Karen
-Chad
-Becky
 Basic bitch
-Gold digger
-Deadbeat
-Bum
-Mooch
-Leech
 Parasite
 Piece of shit
-Waste of space
-Good for nothing
-Worthless
-Pathetic
-Weak
 Pussy ass bitch
 Motherfucking asshole
 Son of a bitch
 Bastard child
-Inbred
-Redneck fuck
-Hillbilly idiot
-Fatass
-Lardass
-Pig
-Cow
-Slob
 Disgusting fuck
 Stinky
 Ugly bastard
@@ -2662,22 +2611,15 @@ nameEntry.appendChild(confirmButton);
 
   installAssistantWindow();
 
-const candidateObserver = new MutationObserver(() => {
+window.__heirCarouselObserver?.disconnect();
+const carouselObserver = window.__heirCarouselObserver = new MutationObserver(() => {
   installArrows();
-  syncCarouselHostState();
-});
-
-candidateObserver.observe(document.body, {
-  childList: true,
-  subtree: true
-});
-
-const assistantObserver = new MutationObserver(() => {
   installAssistantWindow();
   syncCarouselHostState();
+  window.__heirSyncSettings?.();
 });
 
-assistantObserver.observe(document.body, {
+carouselObserver.observe(document.getElementById("game_window") || document.body, {
   childList: true,
   subtree: true
 });
@@ -4860,8 +4802,7 @@ window.theHeirAchievementStorage = {
 };
 
 window.heirCheatsOn = () =>
-  (typeof cheatsActive !== "undefined" && cheatsActive === true) ||
-  (typeof cheats !== "undefined" && +cheats === 1) || +window.cheats === 1;
+  typeof cheatMenuAlreadyActivated !== "undefined" && cheatMenuAlreadyActivated;
 
 window.heirHasAchievementGate = function (gate) {
   if (gate === "presidential-list" && window.heirCheatsOn()) return true;
@@ -5534,13 +5475,7 @@ gameWindow.classList.add("heir-settings-host");
 renderAll(state);
 }
 
-const screenObserver = new MutationObserver(installSettingsScreen);
-
-screenObserver.observe(document.body,{
-childList:true,
-subtree:true
-});
-
+window.__heirSyncSettings = installSettingsScreen;
 window.__theHeirSettingsScreenInstalled = true;
 installSettingsScreen();
 })();
