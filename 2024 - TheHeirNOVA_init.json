@@ -9,20 +9,20 @@ campaignTrail_temp.election_json = [
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Eagle+Lake&amp;display=swap">
 <style>
 .heir-card-cover{display:none}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy){background:#2f2f2f!important;overflow:hidden}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.mod-title{flex-shrink:0;margin-bottom:0;background:#000 url(https://i.imgur.com/D3L7LW3.jpeg) center/cover!important}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.mod-title p{color:#ad1515!important;font-family:"Eagle Lake",Georgia,serif!important;text-shadow:0 1px 4px #000}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.mod-image{display:none}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.mod-desc{flex:1 1 0;min-height:0;height:auto;width:100%;margin:10px 0 0;padding:0;border-radius:0;overflow-y:scroll!important;background:transparent!important;color:#000!important}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.mod-desc>.heir-card-cover{display:block;width:80%;height:auto;margin:0 auto 8px;border:3px solid #9f1212}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.mod-desc>.heir-card-copy{width:89%;margin:5px auto;padding:5px;border-radius:5px;background:#d8d8d8;overflow:visible!important}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.hover-button-holder{flex-shrink:0;flex-wrap:nowrap}
-.community-grid-element:has(>.mod-image):has(.heir-card-copy)>.hover-button-holder>.hover-button{background:#000!important;color:#fff}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy){background:#2f2f2f!important;overflow:hidden}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.mod-title{flex-shrink:0;margin-bottom:0;background:#000 url(https://i.imgur.com/D3L7LW3.jpeg) center/cover!important}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.mod-title p{color:#ad1515!important;font-family:"Eagle Lake",Georgia,serif!important;text-shadow:0 1px 4px #000}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.mod-image{display:none}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.mod-desc{flex:1 1 0;min-height:0;height:auto;width:100%;margin:10px 0 0;padding:0;border-radius:0;overflow-y:scroll!important;background:transparent!important;color:#000!important}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.mod-desc>.heir-card-cover{display:block;width:80%;height:auto;margin:0 auto 8px;border:3px solid #9f1212}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.mod-desc>.heir-uncut-copy{width:89%;margin:5px auto;padding:5px;border-radius:5px;background:#d8d8d8;overflow:visible!important}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.hover-button-holder{flex-shrink:0;flex-wrap:nowrap}
+.community-grid-element:has(>.mod-image):has(.heir-uncut-copy)>.hover-button-holder>.hover-button{background:#000!important;color:#fff}
 </style>
 
 <img class="heir-card-cover" src="https://i.imgur.com/Ph3ENrZ.jpeg" alt="The Heir cover">
 
-<div class="heir-card-copy">
+<div class="heir-uncut-copy">
 <p>In 2016, Donald John Trump shocked the world by becoming the first president of the United States without political experience. Against all odds he defeated the establishment’s darling, Hillary Clinton, by collecting the grievances of the downtrodden and the bigoted into a movement that would come to define humanity for the next decade, encapsulated in a catchy slogan: <em>Make America Great Again</em>.</p>
 
 <p>Now Trump stands at the latter half of his presidency, fully aware that when these four years are over, the spotlight will no longer belong to him. And despite all the rallies, slogans and tweets, America isn’t great. The swamp remains, lurking and waiting for the moment its mortal enemy is gone. And the movement is scrambling, searching, begging, for a successor, for a man who can cross the Jordan, for a new Don.</p>
