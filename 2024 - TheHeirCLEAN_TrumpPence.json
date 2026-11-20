@@ -12328,6 +12328,9 @@ window.__economicModelController
 const upcomingQuestionNumber =
     campaignTrail_temp.player_answers.length;
 
+if (upcomingQuestionNumber === 22)
+    window.__newsomViceController?.check(upcomingQuestionNumber);
+
 window.__applyHeirRoutesBeforeRender?.(
     upcomingQuestionNumber
 );
@@ -16055,9 +16058,9 @@ if (result?.caseKey) {
         return Number(window.campaignTrail_temp?.question_number ?? -1);
     }
 
-    function maybeApplyNewsomVice() {
+    function maybeApplyNewsomVice(questionNumber = getCurrentQuestionNumber()) {
         if (state.applied) return;
-        if (getCurrentQuestionNumber() < TARGET_QUESTION_NUMBER) return;
+        if (questionNumber < TARGET_QUESTION_NUMBER) return;
         if (typeof NewsomVice !== "function") return;
 
         try {
@@ -21716,7 +21719,8 @@ function footerMutationHandler(records) {
             window.__campaignHqController?.syncButton,
             ensureFooterUpdated,
             window.__heirSyncResultTables,
-            window.dataVisualizer?.refreshVisualization
+            window.dataVisualizer?.refreshVisualization,
+            window.__heirNovaSync
         ] : [ensureFooterUpdated];
         for (const task of tasks) {
             try {
@@ -36462,7 +36466,6 @@ if (changed) {
       unlockedAch = unlocked;
     }
     localStorage.setItem("unlockedAch", JSON.stringify(unlocked));
-    localStorage.setItem("unlockedAch", JSON.stringify(unlocked));
         if (!hadGavinChoice && window.heirHasAchievementGate?.("gavin-choice")) {
       heirAchievementQueue.push({
         heading: "Congratulations!",
@@ -36693,40 +36696,19 @@ if (musicKey === previousMusicKey) {
 
 if (typeof addAchivement === "function" && typeof PROPS === "undefined") {
   window.results_timeout ??= 0;
-  const polls = window.pollgraph;
-  const question = renderQuestion;
-  const reading = showFurtherReading;
-
-  renderQuestion = function (...args) {
-    if (Number(campaignTrail_temp.question_number) === 22)
-      window.__newsomViceController?.check();
-    const result = question.apply(this, args);
-    polls?.record(false);
-    return result;
-  };
-
-  showFurtherReading = function (...args) {
-    const result = reading.apply(this, args);
-    window.mountHeirFurtherReading?.(getAssistantChosenName());
-    return result;
-  };
-
-  if (polls) {
-    campaignTrail_temp.collect_results = true;
-    const details = showOverallDetails;
-    showOverallDetails = function (...args) {
-      const result = details.apply(this, args);
-      polls.record(true);
-      if (!document.getElementById("inlinePollGraph")) polls.injectInline();
-      return result;
-    };
-  }
-
-  requestAnimationFrame(() => {
+  campaignTrail_temp.collect_results = true;
+  window.__heirNovaSync = () => {
     const header = document.querySelector("#game_window .game_header");
     if (header?.textContent.trim() === "NovaTCT") header.innerHTML = corrr;
-    polls?.record(false);
-  });
+    if (document.querySelector("#heir-further-reading:not([data-mounted])"))
+      window.mountHeirFurtherReading?.(getAssistantChosenName());
+    const polls = window.pollgraph;
+    if (!polls) return;
+    polls.record(Boolean(campaignTrail_temp.final_overall_results?.length));
+    if (document.getElementById("overall_details_button")?.disabled &&
+        !document.getElementById("inlinePollGraph")) polls.injectInline();
+  };
+  window.__heirNovaSync();
 }
 
 
